@@ -10,10 +10,13 @@ theme = "mainroad"
 name = "Tai Hwan Oh"
 
 [Params]
+pager = true
+toc = true
 description = "오! 데이터 사이언스 블로그입니다."
 copyright = "Tai Hwan Oh"
 opengraph = true
 authorbox = true
+mathjax = true
 
 [Params.sidebar]
 home = "left"
