@@ -1,5 +1,6 @@
 baseURL = "http://example.org/"
-languageCode = "en-us"
+languageCode = "ko-kr"
+defaultContentLanguage = "en-us"
 title = "Oh Data Science"
 paginate = "10"
 theme = "mainroad"
