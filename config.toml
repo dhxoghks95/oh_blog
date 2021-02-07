@@ -1,0 +1,29 @@
+baseURL = "http://example.org/"
+languageCode = "en-us"
+title = "Oh Data Science"
+paginate = "10"
+theme = "mainroad"
+
+[Author]
+
+name = "Tai Hwan Oh"
+
+[Params]
+description = "오! 데이터 사이언스 블로그"
+copyright = "Tai Hwan Oh"
+opengraph = true
+authorbox = true
+
+[Params.sidebar]
+home = "left"
+list = "right"
+
+widgets = ["search", "recent", "categories", "taglist", "social"]
+
+[Params.widgets]
+recend_num = 5
+tags_counter = false
+
+[Params.widgets.social]
+
+github = "https://github.com/dhxoghks95"

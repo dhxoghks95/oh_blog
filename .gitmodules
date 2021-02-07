@@ -2,3 +2,9 @@
 	path = dhxoghks95.github.io
 	url = https://github.com/dhxoghks95/dhxoghks95.github.io.git
 	branch = master
+[submodule "Mainroad"]
+	path = Mainroad
+	url = https://github.com/dhxoghks95/Mainroad.git
+[submodule "themes/Mainroad"]
+	path = themes/Mainroad
+	url = https://github.com/dhxoghks95/Mainroad.git
