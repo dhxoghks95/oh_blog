@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Bayesian Method with TensorFlow Chapter 3. MCMC(Markov Chain Monte Carlo) - 2. 베이지안 군집분석 예제 - Oh Data Science</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+		<meta property="og:title" content="Bayesian Method with TensorFlow Chapter 3. MCMC(Markov Chain Monte Carlo) - 2. 베이지안 군집분석 예제" />
+<meta property="og:description" content="Bayesian Method with TensorFlow - Chapter3 MCMC(Markov Chain Monte Carlo) #@title Imports and Global Variables (make sure to run this cell) { display-mode: &#34;form&#34; } try: # %tensorflow_version only exists in Colab. %tensorflow_version 2.x except Exception: pass from __future__ import absolute_import, division, print_function #@markdown This sets the warning status (default is `ignore`, since this notebook runs correctly) warning_status = &#34;ignore&#34; #@param [&#34;ignore&#34;, &#34;always&#34;, &#34;module&#34;, &#34;once&#34;, &#34;default&#34;, &#34;error&#34;] import warnings warnings.filterwarnings(warning_status) with warnings." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/bayesiancluster/" />
+<meta property="article:published_time" content="2020-09-11T16:48:24+09:00" />
+<meta property="article:modified_time" content="2020-09-11T16:48:24+09:00" />
+
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo">
+		<a class="logo__link" href="/" title="Oh Data Science" rel="home">
+			<div class="logo__item logo__text">
+					<div class="logo__title">Oh Data Science</div>
+					
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Bayesian Method with TensorFlow Chapter 3. MCMC(Markov Chain Monte Carlo) - 2. 베이지안 군집분석 예제</h1>
+			
+		</header><div class="content post__content clearfix">
+			<h1 id="bayesian-method-with-tensorflow---chapter3-mcmcmarkov-chain-monte-carlo"><strong>Bayesian Method with TensorFlow - Chapter3 MCMC(Markov Chain Monte Carlo)</strong></h1>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#@title Imports and Global Variables (make sure to run this cell)  { display-mode: &#34;form&#34; }</span>
+
+<span style="color:#66d9ef">try</span>:
+  <span style="color:#75715e"># %tensorflow_version only exists in Colab.</span>
+  <span style="color:#f92672">%</span>tensorflow_version <span style="color:#ae81ff">2.</span>x
+<span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span>:
+  <span style="color:#66d9ef">pass</span>
+
+
+<span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> absolute_import, division, print_function
+
+
+<span style="color:#75715e">#@markdown This sets the warning status (default is `ignore`, since this notebook runs correctly)</span>
+warning_status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ignore&#34;</span> <span style="color:#75715e">#@param [&#34;ignore&#34;, &#34;always&#34;, &#34;module&#34;, &#34;once&#34;, &#34;default&#34;, &#34;error&#34;]</span>
+<span style="color:#f92672">import</span> warnings
+warnings<span style="color:#f92672">.</span>filterwarnings(warning_status)
+<span style="color:#66d9ef">with</span> warnings<span style="color:#f92672">.</span>catch_warnings():
+    warnings<span style="color:#f92672">.</span>filterwarnings(warning_status, category<span style="color:#f92672">=</span><span style="color:#a6e22e">DeprecationWarning</span>)
+    warnings<span style="color:#f92672">.</span>filterwarnings(warning_status, category<span style="color:#f92672">=</span><span style="color:#a6e22e">UserWarning</span>)
+
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+<span style="color:#f92672">import</span> os
+<span style="color:#75715e">#@markdown This sets the styles of the plotting (default is styled like plots from [FiveThirtyeight.com](https://fivethirtyeight.com/)</span>
+matplotlib_style <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;fivethirtyeight&#39;</span> <span style="color:#75715e">#@param [&#39;fivethirtyeight&#39;, &#39;bmh&#39;, &#39;ggplot&#39;, &#39;seaborn&#39;, &#39;default&#39;, &#39;Solarize_Light2&#39;, &#39;classic&#39;, &#39;dark_background&#39;, &#39;seaborn-colorblind&#39;, &#39;seaborn-notebook&#39;]</span>
+<span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#f92672">as</span> plt; plt<span style="color:#f92672">.</span>style<span style="color:#f92672">.</span>use(matplotlib_style)
+<span style="color:#f92672">import</span> matplotlib.axes <span style="color:#f92672">as</span> axes;
+<span style="color:#f92672">from</span> matplotlib.patches <span style="color:#f92672">import</span> Ellipse
+<span style="color:#f92672">import</span> matplotlib <span style="color:#f92672">as</span> mpl
+<span style="color:#75715e">#%matplotlib inline</span>
+<span style="color:#f92672">import</span> seaborn <span style="color:#f92672">as</span> sns; sns<span style="color:#f92672">.</span>set_context(<span style="color:#e6db74">&#39;notebook&#39;</span>)
+<span style="color:#f92672">from</span> IPython.core.pylabtools <span style="color:#f92672">import</span> figsize
+<span style="color:#75715e">#@markdown This sets the resolution of the plot outputs (`retina` is the highest resolution)</span>
+notebook_screen_res <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;retina&#39;</span> <span style="color:#75715e">#@param [&#39;retina&#39;, &#39;png&#39;, &#39;jpeg&#39;, &#39;svg&#39;, &#39;pdf&#39;]</span>
+<span style="color:#75715e">#%config InlineBackend.figure_format = notebook_screen_res</span>
+
+<span style="color:#f92672">import</span> tensorflow <span style="color:#f92672">as</span> tf
+
+<span style="color:#f92672">import</span> tensorflow_probability <span style="color:#f92672">as</span> tfp
+tfd <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>distributions
+tfb <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>bijectors
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">_TFColor</span>(object):
+    <span style="color:#e6db74">&#34;&#34;&#34;Enum of colors used in TF docs.&#34;&#34;&#34;</span>
+    red <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#F15854&#39;</span>
+    blue <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#5DA5DA&#39;</span>
+    orange <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#FAA43A&#39;</span>
+    green <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#60BD68&#39;</span>
+    pink <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#F17CB0&#39;</span>
+    brown <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#B2912F&#39;</span>
+    purple <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#B276B2&#39;</span>
+    yellow <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#DECF3F&#39;</span>
+    gray <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#4D4D4D&#39;</span>
+    <span style="color:#66d9ef">def</span> __getitem__(self, i):
+        <span style="color:#66d9ef">return</span> [
+            self<span style="color:#f92672">.</span>red,
+            self<span style="color:#f92672">.</span>orange,
+            self<span style="color:#f92672">.</span>green,
+            self<span style="color:#f92672">.</span>blue,
+            self<span style="color:#f92672">.</span>pink,
+            self<span style="color:#f92672">.</span>brown,
+            self<span style="color:#f92672">.</span>purple,
+            self<span style="color:#f92672">.</span>yellow,
+            self<span style="color:#f92672">.</span>gray,
+        ][i <span style="color:#f92672">%</span> <span style="color:#ae81ff">9</span>]
+TFColor <span style="color:#f92672">=</span> _TFColor()
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">session_options</span>(enable_gpu_ram_resizing<span style="color:#f92672">=</span>True, enable_xla<span style="color:#f92672">=</span>False):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    Allowing the notebook to make use of GPUs if they&#39;re available.
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    XLA (Accelerated Linear Algebra) is a domain-specific compiler for linear
+</span><span style="color:#e6db74">    algebra that optimizes TensorFlow computations.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    config <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>config
+    gpu_devices <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span>experimental<span style="color:#f92672">.</span>list_physical_devices(<span style="color:#e6db74">&#39;GPU&#39;</span>)
+    <span style="color:#66d9ef">if</span> enable_gpu_ram_resizing:
+        <span style="color:#66d9ef">for</span> device <span style="color:#f92672">in</span> gpu_devices:
+           tf<span style="color:#f92672">.</span>config<span style="color:#f92672">.</span>experimental<span style="color:#f92672">.</span>set_memory_growth(device, True)
+    <span style="color:#66d9ef">if</span> enable_xla:
+        config<span style="color:#f92672">.</span>optimizer<span style="color:#f92672">.</span>set_jit(True)
+    <span style="color:#66d9ef">return</span> config
+
+session_options(enable_gpu_ram_resizing<span style="color:#f92672">=</span>True, enable_xla<span style="color:#f92672">=</span>True)
+
+<span style="color:#960050;background-color:#1e0010">!</span>apt <span style="color:#f92672">-</span>qq <span style="color:#f92672">-</span>y install fonts<span style="color:#f92672">-</span>nanum
+ 
+<span style="color:#f92672">import</span> matplotlib.font_manager <span style="color:#f92672">as</span> fm
+fontpath <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf&#39;</span>
+font <span style="color:#f92672">=</span> fm<span style="color:#f92672">.</span>FontProperties(fname<span style="color:#f92672">=</span>fontpath, size<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>)
+plt<span style="color:#f92672">.</span>rc(<span style="color:#e6db74">&#39;font&#39;</span>, family<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;NanumBarunGothic&#39;</span>) 
+mpl<span style="color:#f92672">.</span>font_manager<span style="color:#f92672">.</span>_rebuild()
+</code></pre></div><pre><code>fonts-nanum is already the newest version (20170925-1).
+The following package was automatically installed and is no longer required:
+  libnvidia-common-440
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 39 not upgraded.
+</code></pre>
+<h1 id="2-예제--mixture-model을-활용한-비지도-군집분석"><strong>2. 예제 : Mixture Model을 활용한 비지도 군집분석</strong></h1>
+<p>다음과 같은 데이터셋을 가지고 있다고 합시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#pip install wget</span>
+<span style="color:#f92672">import</span> wget
+url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://raw.githubusercontent.com/CamDavidsonPilon/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/master/Chapter3_MCMC/data/mixture_data.csv&#39;</span>
+filename <span style="color:#f92672">=</span> wget<span style="color:#f92672">.</span>download(url)
+filename
+</code></pre></div><pre><code>'mixture_data (1).csv'
+</code></pre>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">6</span>))
+data_ <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>loadtxt(<span style="color:#e6db74">&#34;mixture_data.csv&#34;</span>, delimiter<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;,&#34;</span>)
+
+plt<span style="color:#f92672">.</span>hist(data_, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>, color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;k&#34;</span>, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stepfilled&#34;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.8</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;데이터셋의 히스토그램&#34;</span>)
+plt<span style="color:#f92672">.</span>ylim([<span style="color:#ae81ff">0</span>, None]);
+<span style="color:#66d9ef">print</span>(data_[:<span style="color:#ae81ff">10</span>], <span style="color:#e6db74">&#34;...&#34;</span>)
+</code></pre></div><pre><code>[115.85679142 152.26153716 178.87449059 162.93500815 107.02820697
+ 105.19141146 118.38288501 125.3769803  102.88054011 206.71326136] ...
+</code></pre>
+<p><img src="https://user-images.githubusercontent.com/57588650/92886762-e97aff80-f44e-11ea-8d49-87141befcca2.png" alt="output_5_1"></p>
+<p>어때보이나요? 양봉의 데이터인 것으로 보입니다. 즉 120 근처와 200 근처에 두 개의 봉우리를 가진 것 같아요. 아마도 이 데이터셋에는 <em>두 개의 군집</em>이 있을 것입니다.</p>
+<p>이 데이터셋은 지난 장에서 배운 데이터 생성 모델링의 좋은 예시입니다. 일단 데이터가 어떻게 만들어졌을지를 생각해봅시다. 저는 다음과 같은 데이터 생성 알고리즘을 제안하고싶어요.</p>
+<ol>
+<li>각각의 데이터 지점에서, p의 확률로 군집 1을 선택하고 나머지는 군집 2를 선택하도록 하겠습니다.</li>
+<li>모수 $\mu_i$와 $\sigma_i$를 모수로 하는 정규 분포에서 무작위 값들을 뽑습니다. 여기서 i는 1단계에서 선택한 군집 1, 2입니다.</li>
+<li>계속 반복합시다.</li>
+</ol>
+<p>이 알고리즘은 관찰된 데이터셋과 비슷한 효과를 만듭니다. 그래서 이걸 우리의 모델로 선택합시다. 당연히 우리는 $p$나 정규분포의 모수들을 모릅니다. 그래서 우리는 이것들을 추론하거나 <em>학습</em>해야합니다.</p>
+<p>두 개의 정규분포를 $N_0$, $N_1$라고 합시다.(인덱스가 0부터 시작하는건 그냥 파이썬이 0부터 숫자가 시작해섭니다.) 두 개는 지금 알려지지 않은 평균과 표준편차 $\mu_i$와 $\sigma_i$를 가지고 있고, 여기서 $i$는 각 군집별로 0 또는 1이 될 것입니다. 특정한 데이터 지점은 $N_0$이나 $N_1$ 둘 중 하나에서 왔을 것이고 그 데이터 지점이 $p$의 확률로 $N_0$에 할당된다고 가정합시다.</p>
+<p>각 군집에 데이터 지점을 할당하는 적절한 방법은 <a href="https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/Categorical">TF <code>Categorical</code> variable</a>을 사용하는 것입니다. 이것의 모수는 전부 더하면 0인 길이가 $k$인 확률들의 array입니다. 그리고 이것의 <code>value</code> attribute는 <code>0</code>과 $k-1$사이에서 만들어진 확률들의 array에 따라 무작위로 골라진 정수입니다. 우리는 군집 1에 할당될 확률을 모릅니다. 그렇기 때문에 사전 분포로 $\text{Uniform}(0,1)$을 선택하겠습니다. 이것을 $p_1$이라고 하죠. 그에 따라 군집 2에 할당될 확률 $p_2$는 $1 - p_1$이 됩니다.</p>
+<p>운좋게도 우리는 선택된 <code>[p1, p1]</code>를 우리의 <code>Categorical</code> 변수에 줄 수 있습니다. 필요하다면 또한 <code>tf.stack()</code>함수를 써서 그것이 이해할 수 있게 $p_1$과 $p_2$를 하나의 벡터로 합칠 수도 있죠. 우리는 이 벡터를 두개의 분포들을 고르는 오즈(odds)의 아이디어를 주기 위해 <code>Categorical</code>변수에 넣겠습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># evaluate 함수 생성</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">evaluate</span>(tensors):
+    <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>executing_eagerly():
+         <span style="color:#66d9ef">return</span> tf<span style="color:#f92672">.</span>nest<span style="color:#f92672">.</span>pack_sequence_as(
+             tensors,
+             [t<span style="color:#f92672">.</span>numpy() <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>is_tensor(t) <span style="color:#66d9ef">else</span> t
+             <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> tf<span style="color:#f92672">.</span>nest<span style="color:#f92672">.</span>flatten(tensors)])
+    <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>Session() <span style="color:#66d9ef">as</span> sess:
+        <span style="color:#66d9ef">return</span> sess<span style="color:#f92672">.</span>run(tensors)
+
+<span style="color:#75715e"># 0과 1 사이의 Uniform으로 p1, p2 만들고 tf.stack()으로 벡터로 만들기</span>
+p1 <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;p&#39;</span>, low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)<span style="color:#f92672">.</span>sample()
+p2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> p1
+p <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>stack([p1, p2])
+
+<span style="color:#75715e"># tfd.Categorical()에 넣고 데이터의 수 만큼 표본 뽑기</span>
+rv_assignment <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Categorical(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;assignment&#34;</span>,probs<span style="color:#f92672">=</span>p) 
+assignment <span style="color:#f92672">=</span> rv_assignment<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>data_<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>])
+
+<span style="color:#75715e"># 실행하기</span>
+[
+    p_,
+    assignment_
+] <span style="color:#f92672">=</span> evaluate([
+    p,
+    assignment
+])
+
+<span style="color:#75715e"># 앞의 10개 출력하기</span>
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;prior assignment, with p = </span><span style="color:#e6db74">%.2f</span><span style="color:#e6db74">:&#34;</span> <span style="color:#f92672">%</span> p_[<span style="color:#ae81ff">0</span>])
+<span style="color:#66d9ef">print</span> (assignment_[:<span style="color:#ae81ff">10</span>])
+
+</code></pre></div><pre><code>prior assignment, with p = 0.87:
+[0 0 0 0 0 0 0 0 0 0]
+</code></pre>
+<p>위의 데이터셋을 보면, 두 개의 정규분포의 표준편차가 다르다고 추론할 수 있습니다. 표준편차가 무었인지 모른다는 가정을 유지하기 위해 처음에는 그들을 <code>0</code>과 <code>100</code>사이의 Uniform 분포로 모델링하겠습니다. 다음과 같은 한 줄의 TFP 코드로 두 개의 표준편차를 우리의 모델에 포함시킬 수 있습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">rv_sds <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;rv_sds&#34;</span>, low <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0.</span>, <span style="color:#ae81ff">0.</span>], high <span style="color:#f92672">=</span> [<span style="color:#ae81ff">100.</span>, <span style="color:#ae81ff">100.</span>])
+</code></pre></div><p>여기에서 우리는 모양이 2인 두 개의 같은 모수를 가진 독립된 분포를 만드는 배치(batch)를 사용하겠습니다. 모양(shape)가 무엇인지는 <a href="https://colab.research.google.com/github/tensorflow/probability/blob/master/tensorflow_probability/examples/jupyter_notebooks/Understanding_TensorFlow_Distributions_Shapes.ipynb">TFP Shape</a>를 참고하세요.</p>
+<p>우리는 두 군집의 중앙에도 사전 믿음을 줄 필요가 있습니다. 이 중심은 실제로 이 정규분포들의 $\mu$ 모수가 될 것입니다. 그들의 사전 분포는 정규 분포로 모델링될 수 있습니다. 데이터를 보면, 두 개의 중심이 어디에 있을지 유추할 수 있습니다. 바로 <code>120</code>과 <code>190</code>근처죠. 물론 눈대중으로 본 것이기 때문에 아주 확신하지는 못합니다. 따라서 $\mu_0 = 120$으로 놓고 $\mu_1 = 190$으로 놓도록 하겠습니다. $\sigma_0 = \sigma_1 = 10$이라고도 가정해보죠.</p>
+<p>마지막으로 우리는 <a href="https://https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/MixtureSameFamily">MixtureSameFamily</a>분포를 사용해 두 정규분포를 섞도록 하겠습니다. 우리의 <code>Categorical</code> 분포는 선택하는 함수(selecting function)로 쓰도록 하죠.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 표준편차를 Uniform(0, 100)으로 설정</span>
+rv_sds <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_sds&#34;</span>, low<span style="color:#f92672">=</span>[<span style="color:#ae81ff">0.</span>, <span style="color:#ae81ff">0.</span>], high<span style="color:#f92672">=</span>[<span style="color:#ae81ff">100.</span>, <span style="color:#ae81ff">100.</span>])
+<span style="color:#66d9ef">print</span> (str(rv_sds))
+
+<span style="color:#75715e"># 두 정규분포의 중심을 각각 120과 190의 평균과 표준편차는 둘 모두 10인 정규분포를 따른다고 설정</span>
+rv_centers <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Normal(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_centers&#34;</span>, loc<span style="color:#f92672">=</span>[<span style="color:#ae81ff">120.</span>, <span style="color:#ae81ff">190.</span>], scale<span style="color:#f92672">=</span>[<span style="color:#ae81ff">10.</span>, <span style="color:#ae81ff">10.</span>])
+
+<span style="color:#75715e"># 표준편차와 중심의 표본 뽑기</span>
+sds <span style="color:#f92672">=</span> rv_sds<span style="color:#f92672">.</span>sample()
+<span style="color:#66d9ef">print</span> (<span style="color:#e6db74">&#34;shape of sds sample:&#34;</span>,sds<span style="color:#f92672">.</span>shape)
+centers <span style="color:#f92672">=</span> rv_centers<span style="color:#f92672">.</span>sample()
+
+<span style="color:#75715e"># tfd.Categorical에 tf.stack()을 사용해 할당하고 표본 10개 뽑기</span>
+rv_assignments <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Categorical(probs<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>stack([<span style="color:#ae81ff">0.4</span>, <span style="color:#ae81ff">0.6</span>]))
+assignments <span style="color:#f92672">=</span> rv_assignments<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>)
+
+<span style="color:#75715e"># 만들어진 값들을 tfd.MixtureSameFamily로 합치기</span>
+rv_observations <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>MixtureSameFamily(
+    mixture_distribution<span style="color:#f92672">=</span>rv_assignments,
+    components_distribution<span style="color:#f92672">=</span>tfd<span style="color:#f92672">.</span>Normal(
+        loc<span style="color:#f92672">=</span>centers,
+        scale<span style="color:#f92672">=</span>sds))
+
+observations <span style="color:#f92672">=</span> rv_observations<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>)
+
+[    
+    assignments_,
+    observations_,
+    sds_,
+    centers_
+] <span style="color:#f92672">=</span> evaluate([
+    assignments,
+    observations,
+    sds,
+    centers
+])
+
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;시뮬레이션한 데이터: &#34;</span>, observations_[:<span style="color:#ae81ff">4</span>], <span style="color:#e6db74">&#34;...&#34;</span>)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;무작위 군집 할당: &#34;</span>, assignments_[:<span style="color:#ae81ff">4</span>], <span style="color:#e6db74">&#34;...&#34;</span>)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;두 군집에 할당된 중심: &#34;</span>, centers_[:<span style="color:#ae81ff">4</span>], <span style="color:#e6db74">&#34;...&#34;</span>)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;두 군집에 할당된 표준편차: &#34;</span>, sds_[:<span style="color:#ae81ff">4</span>],<span style="color:#e6db74">&#34;...&#34;</span>)
+
+</code></pre></div><pre><code>tfp.distributions.Uniform(&quot;rv_sds&quot;, batch_shape=[2], event_shape=[], dtype=float32)
+shape of sds sample: (2,)
+시뮬레이션한 데이터:  [120.93152 208.45    118.88601 144.10368] ...
+무작위 군집 할당:  [0 0 1 0] ...
+두 군집에 할당된 중심:  [111.18189 173.47575] ...
+두 군집에 할당된 표준편차:  [53.327393 83.09629 ] ...
+</code></pre>
+<p>비슷한 방식으로, 밑에 있는 <code>join_log_prob</code>함수에서 우리는 우리의 사전 믿음들을 중심과 표준편차로 가지는 두 개의 군집을 만들도록 하겠습니다. 그리고 우리는 그들을 우리의 <code>Categorical</code> 변수에서 정의한 그들의 가중치 비율(0.4, 0.6)대로 그들을 섞어서 두 개의 정규분포가 섞인 분포를 만들도록 하겠습니다. 마지막으로 각각의 데이터 지점에서 그 섞인 분포를 통해 표본을 뽑도록 하겠습니다.</p>
+<p>이 모델이 군집에 할당된 변수들(0,1 두 개에 할당된 것이기 때문에 discrete하겠죠?)을 marginalizing out(합해서 변수가 아닌 상수로 만듦)하기 때문에 모든 남아있는 확률 변수들은 연속적입니다. 그래서 간단하게 HMC모델로 만들 수 있죠.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">joint_log_prob</span>(data_, sample_prob_1, sample_centers, sample_sds):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    결합 로그 확률 최적화 함수
+</span><span style="color:#e6db74">        
+</span><span style="color:#e6db74">    Args:
+</span><span style="color:#e6db74">      data: 기존 데이터를 나타내는 tensor array
+</span><span style="color:#e6db74">      sample_prob_1: 군집 0에 할당될 확률(scalar)
+</span><span style="color:#e6db74">      sample_sds: 두 정규분포의 표준편차를 가지고 있는 2차원 벡터
+</span><span style="color:#e6db74">      sample_centers: 두 정규분포의 중심을 가지고 있는 2차원 벡터
+</span><span style="color:#e6db74">    Returns: 
+</span><span style="color:#e6db74">      결합 로그 확률 최적화 함수
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>  
+    <span style="color:#75715e">### 두 정규분포를 섞읍시다</span>
+
+    <span style="color:#75715e"># 각각의 군집에 포함될 확률 만들고 tfd.Categorical에 합치기</span>
+    rv_prob <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;rv_prob&#39;</span>, low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)
+    sample_prob_2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.</span> <span style="color:#f92672">-</span> sample_prob_1
+    rv_assignments <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Categorical(probs<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>stack([sample_prob_1, sample_prob_2]))
+    
+    <span style="color:#75715e"># 두 정규분포에 할당될 표준편차와 중심의 분포 만들기</span>
+    rv_sds <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_sds&#34;</span>, low<span style="color:#f92672">=</span>[<span style="color:#ae81ff">0.</span>, <span style="color:#ae81ff">0.</span>], high<span style="color:#f92672">=</span>[<span style="color:#ae81ff">100.</span>, <span style="color:#ae81ff">100.</span>])
+    rv_centers <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Normal(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_centers&#34;</span>, loc<span style="color:#f92672">=</span>[<span style="color:#ae81ff">120.</span>, <span style="color:#ae81ff">190.</span>], scale<span style="color:#f92672">=</span>[<span style="color:#ae81ff">10.</span>, <span style="color:#ae81ff">10.</span>])
+    
+    <span style="color:#75715e"># 만들어진 값들을 tfd.MixtureSameFamily에 합치기</span>
+    rv_observations <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>MixtureSameFamily(
+        mixture_distribution<span style="color:#f92672">=</span>rv_assignments,
+        components_distribution<span style="color:#f92672">=</span>tfd<span style="color:#f92672">.</span>Normal(
+          loc<span style="color:#f92672">=</span>sample_centers,       <span style="color:#75715e"># 각각의 값들을 할당</span>
+          scale<span style="color:#f92672">=</span>sample_sds))        <span style="color:#75715e"># 여기도 마찬가지</span>
+    <span style="color:#66d9ef">return</span> (
+        rv_prob<span style="color:#f92672">.</span>log_prob(sample_prob_1)
+        <span style="color:#f92672">+</span> rv_prob<span style="color:#f92672">.</span>log_prob(sample_prob_2)
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_observations<span style="color:#f92672">.</span>log_prob(data_))      <span style="color:#75715e"># 샘플들끼리 더하기</span>
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_centers<span style="color:#f92672">.</span>log_prob(sample_centers)) <span style="color:#75715e"># 요소끼리 더하기</span>
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_sds<span style="color:#f92672">.</span>log_prob(sample_sds))         <span style="color:#75715e"># 요소끼리 더하기</span>
+    )
+
+</code></pre></div><p>25000번 반복하는 HMC 샘플링 방법을 통해 공간을 탐험해봅시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">number_of_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">25000</span> 
+burnin<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span> 
+num_leapfrog_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>
+
+<span style="color:#75715e"># 체인의 시작점 설정</span>
+initial_chain_state <span style="color:#f92672">=</span> [
+    tf<span style="color:#f92672">.</span>constant(<span style="color:#ae81ff">0.5</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;init_probs&#39;</span>),
+    tf<span style="color:#f92672">.</span>constant([<span style="color:#ae81ff">120.</span>, <span style="color:#ae81ff">190.</span>], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;init_centers&#39;</span>),
+    tf<span style="color:#f92672">.</span>constant([<span style="color:#ae81ff">10.</span>, <span style="color:#ae81ff">10.</span>], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;init_sds&#39;</span>)
+]
+
+<span style="color:#75715e"># HMC가 과도하게 아무런 제약 없는 공간에서 실행되기 때문에 변환합시다</span>
+unconstraining_bijectors <span style="color:#f92672">=</span> [
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity(),       
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity(),       
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity(),       
+]
+
+<span style="color:#75715e"># 우리의 joint_log_prob의 클로저를 정의합시다</span>
+unnormalized_posterior_log_prob <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> <span style="color:#f92672">*</span>args: joint_log_prob(data_, <span style="color:#f92672">*</span>args)
+
+
+<span style="color:#75715e"># HMC를 정의합시다</span>
+hmc<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>SimpleStepSizeAdaptation(
+tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>TransformedTransitionKernel(
+    inner_kernel<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>HamiltonianMonteCarlo(
+        target_log_prob_fn<span style="color:#f92672">=</span>unnormalized_posterior_log_prob,
+        num_leapfrog_steps<span style="color:#f92672">=</span>num_leapfrog_steps,
+        step_size<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>,
+        state_gradients_are_stopped<span style="color:#f92672">=</span>True),
+    bijector<span style="color:#f92672">=</span>unconstraining_bijectors),
+     num_adaptation_steps<span style="color:#f92672">=</span>int(burnin <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.8</span>)
+)
+<span style="color:#75715e"># 체인에서 샘플링합시다</span>
+[
+    posterior_prob,
+    posterior_centers,
+    posterior_sds
+], kernel_results <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>sample_chain(
+    num_results<span style="color:#f92672">=</span>number_of_steps,
+    num_burnin_steps<span style="color:#f92672">=</span>burnin,
+    current_state<span style="color:#f92672">=</span>initial_chain_state,
+    kernel<span style="color:#f92672">=</span>hmc)
+</code></pre></div><p>그래프에 저장된 샘플들을 실행합시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">[
+    posterior_prob_,
+    posterior_centers_,
+    posterior_sds_,
+    kernel_results_
+] <span style="color:#f92672">=</span> evaluate([
+    posterior_prob,
+    posterior_centers,
+    posterior_sds,
+    kernel_results
+])
+</code></pre></div><p>우리의 미지의 모수들의 trace를 보도록 합시다. 쉽게 말하면 미지의 모수들(중심들, precision들(분산의 역수), 그리고 p)이 어떤 길을 따라서 샘플링됐는지를 봅시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">9</span>))
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">311</span>)
+lw <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+center_trace <span style="color:#f92672">=</span> posterior_centers_
+
+<span style="color:#75715e"># 색을 이쁘게 넣읍시당</span>
+colors <span style="color:#f92672">=</span> [TFColor[<span style="color:#ae81ff">3</span>], TFColor[<span style="color:#ae81ff">0</span>]] <span style="color:#66d9ef">if</span> center_trace[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>] <span style="color:#f92672">&gt;</span> center_trace[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>] \
+    <span style="color:#66d9ef">else</span> [TFColor[<span style="color:#ae81ff">0</span>], TFColor[<span style="color:#ae81ff">3</span>]]
+
+plt<span style="color:#f92672">.</span>plot(center_trace[:, <span style="color:#ae81ff">0</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 0의 중심의 발자취&#34;</span>, c<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">0</span>], lw<span style="color:#f92672">=</span>lw)
+plt<span style="color:#f92672">.</span>plot(center_trace[:, <span style="color:#ae81ff">1</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 1의 중심의 발자취&#34;</span>, c<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">1</span>], lw<span style="color:#f92672">=</span>lw)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;미지의 모수들의 발자취(trace)&#34;</span>)
+leg <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper right&#34;</span>)
+leg<span style="color:#f92672">.</span>get_frame()<span style="color:#f92672">.</span>set_alpha(<span style="color:#ae81ff">0.7</span>)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">312</span>)
+std_trace <span style="color:#f92672">=</span> posterior_sds_
+plt<span style="color:#f92672">.</span>plot(std_trace[:, <span style="color:#ae81ff">0</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 0의 표준편차의 발자취&#34;</span>,
+     c<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">0</span>], lw<span style="color:#f92672">=</span>lw)
+plt<span style="color:#f92672">.</span>plot(std_trace[:, <span style="color:#ae81ff">1</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 1의 표준편차의 발자취&#34;</span>,
+     c<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">1</span>], lw<span style="color:#f92672">=</span>lw)
+plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper left&#34;</span>)
+
+plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">313</span>)
+p_trace <span style="color:#f92672">=</span> posterior_prob_
+plt<span style="color:#f92672">.</span>plot(p_trace, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;$p$: 군집 0에 할당되는 빈도&#34;</span>,
+     color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">2</span>], lw<span style="color:#f92672">=</span>lw)
+plt<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#34;Steps&#34;</span>)
+plt<span style="color:#f92672">.</span>ylim(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>)
+plt<span style="color:#f92672">.</span>legend();
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92886767-eaac2c80-f44e-11ea-9fb5-d3eed6729772.png" alt="output_20_0"></p>
+<p>다음과 같은 특징에 주목합시다.</p>
+<ol>
+<li>트레이스들은 한 점이 아니라 가능한 지점들의 분포로 수렴합니다. 이것이 MCMC 알고리즘에서의 수렴입니다.</li>
+<li>최초의 몇 천개의 데이터를 사용해 추론을 하는 것은 안좋은 생각입니다. 그들이 우리가 관심있는 최종 분포에 관련없기 때문이죠. 따라서 그러한 표본들을 추론 전에 버리는 것이 좋은 생각입니다. 우리는 이러한 수렴 전의 기간을 <em>burn-in period</em>라고 하겠습니다.</li>
+<li>트레이스들은 공간에서의 <a href="https://ko.wikipedia.org/wiki/%EB%AC%B4%EC%9E%91%EC%9C%84_%ED%96%89%EB%B3%B4">random walk</a>인 것 처럼 보입니다.즉 경로들은 이전 위치와의  상관관계가 있다는 것을 보여줍니다. 이것은 좋기도 하고 나쁘기도 합니다. 우리는 항상 이전 위치와 현재 위치 사이의 상관관계를 가지고 있습니다. 그러나 너무 큰 상관관계는 우리가 공간을 잘 탐험하고 있지 못하다는 것을 의미하죠. 이것은 이 챕터의 후반부 진단(Diagnostics) 파트에서 다루도록 하겠습니다.</li>
+</ol>
+<p>나중의 수렴을 얻기 위해 MCMC step들을 더 수행해봅시다. 위에서 만든 MCMC 알고리즘의 pseudo-code에서, 중요한 오직 하나의 위치는 현재 위치입니다.(새로운 위치는 현재 위치 주변에서 찾습니다.) 우리가 떠난 곳에서 시작하기 위해, 우리는 미지의 모수들의 현재 값을 <code>initial_chain_state()</code> 변수에 넣습니다. 이미 계산된 그 값은 덮어씌어지지 않을 것입니다. 이것은 우리의 샘플링이 우리가 떠난 그 자리와 같은 자리에서 계속되는 것을 보장해줍니다.</p>
+<p>MCMC 샘플링을 5만번 더 해보고 진행 과정을 시각화해봅시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">number_of_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">50000</span>
+burnin<span style="color:#f92672">=</span><span style="color:#ae81ff">10000</span> 
+num_leapfrog_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>
+
+<span style="color:#75715e"># 체인의 시작 지점을 설정합니다</span>
+initial_chain_state <span style="color:#f92672">=</span> [
+    tf<span style="color:#f92672">.</span>constant(posterior_prob_[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;init_probs_2&#39;</span>),
+    tf<span style="color:#f92672">.</span>constant(posterior_centers_[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;init_centers_2&#39;</span>),
+    tf<span style="color:#f92672">.</span>constant(posterior_sds_[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;init_sds_2&#39;</span>)
+]
+
+<span style="color:#75715e"># HMC가 과도하게 아무런 제약 없는 공간에서 실행되기 때문에 변환합시다</span>
+unconstraining_bijectors <span style="color:#f92672">=</span> [
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity(),       
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity(),       
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity(),       
+]
+
+<span style="color:#75715e"># 우리의 joint_log_prob의 클로저를 정의합시다</span>
+unnormalized_posterior_log_prob <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> <span style="color:#f92672">*</span>args: joint_log_prob(data_, <span style="color:#f92672">*</span>args)
+
+
+<span style="color:#75715e"># HMC를 정의합니다</span>
+hmc<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>SimpleStepSizeAdaptation(
+tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>TransformedTransitionKernel(
+    inner_kernel<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>HamiltonianMonteCarlo(
+        target_log_prob_fn<span style="color:#f92672">=</span>unnormalized_posterior_log_prob,
+        num_leapfrog_steps<span style="color:#f92672">=</span>num_leapfrog_steps,
+        step_size<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>,
+        state_gradients_are_stopped<span style="color:#f92672">=</span>True),
+    bijector<span style="color:#f92672">=</span>unconstraining_bijectors),
+     num_adaptation_steps<span style="color:#f92672">=</span>int(burnin <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.8</span>)
+)
+
+<span style="color:#75715e"># 체인에서 샘플을 뽑읍시다</span>
+[
+    posterior_prob_2,
+    posterior_centers_2,
+    posterior_sds_2
+], kernel_results <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>sample_chain(
+    num_results<span style="color:#f92672">=</span>number_of_steps,
+    num_burnin_steps<span style="color:#f92672">=</span>burnin,
+    current_state<span style="color:#f92672">=</span>initial_chain_state,
+    kernel<span style="color:#f92672">=</span>hmc)
+
+[
+    posterior_prob_2_,
+    posterior_centers_2_,
+    posterior_sds_2_,
+    kernel_results_
+] <span style="color:#f92672">=</span> evaluate([
+    posterior_prob_2,
+    posterior_centers_2,
+    posterior_sds_2,
+    kernel_results
+])
+
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">4</span>))
+center_trace <span style="color:#f92672">=</span> posterior_centers_2_
+prev_center_trace <span style="color:#f92672">=</span> posterior_centers_
+
+x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">25000</span>)
+plt<span style="color:#f92672">.</span>plot(x, prev_center_trace[:, <span style="color:#ae81ff">0</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 0의 이전 발자취&#34;</span>,
+      lw<span style="color:#f92672">=</span>lw, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.4</span>, c<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">1</span>])
+plt<span style="color:#f92672">.</span>plot(x, prev_center_trace[:, <span style="color:#ae81ff">1</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 1의 이전 발자취&#34;</span>,
+      lw<span style="color:#f92672">=</span>lw, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.4</span>, c<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">0</span>])
+
+x <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">25000</span>, <span style="color:#ae81ff">75000</span>)
+plt<span style="color:#f92672">.</span>plot(x, center_trace[:, <span style="color:#ae81ff">0</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 0의 새로운 발자취&#34;</span>, lw<span style="color:#f92672">=</span>lw, c<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;#5DA5DA&#34;</span>)
+plt<span style="color:#f92672">.</span>plot(x, center_trace[:, <span style="color:#ae81ff">1</span>], label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 1의 새로운 발자취&#34;</span>, lw<span style="color:#f92672">=</span>lw, c<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;#F15854&#34;</span>)
+
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;미지의 중심 모수들의 발자취&#34;</span>)
+leg <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper right&#34;</span>)
+leg<span style="color:#f92672">.</span>get_frame()<span style="color:#f92672">.</span>set_alpha(<span style="color:#ae81ff">0.8</span>)
+plt<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#34;Steps&#34;</span>);
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92886772-ebdd5980-f44e-11ea-9457-7f3e1cb062fa.png" alt="output_23_0"></p>
+<h2 id="군집-분석"><strong>군집 분석</strong></h2>
+<p>우리의 이번 예제의 목적은 까먹지 않으셨죠? 바로 군집을 찾아내는 것입니다. 위의 코드들로 우리는 미지수에 대한 사후 분포를 결정했습니다. 밑에서 중심과 표준편차의 사후 분포들을 그래프로 그려보도록 하겠습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">8</span>))
+std_trace <span style="color:#f92672">=</span> posterior_sds_2_
+prev_std_trace <span style="color:#f92672">=</span> posterior_sds_
+
+_i <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]
+<span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">2</span>):
+    plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">2</span>, _i[<span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> i])
+    plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;군집 </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">의 사후 중심&#34;</span> <span style="color:#f92672">%</span> i)
+    plt<span style="color:#f92672">.</span>hist(center_trace[:, i], color<span style="color:#f92672">=</span>colors[i], bins<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>,
+             histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stepfilled&#34;</span>)
+
+    plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">2</span>, _i[<span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>])
+    plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;군집 </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">의 사후 표준편차&#34;</span> <span style="color:#f92672">%</span> i)
+    plt<span style="color:#f92672">.</span>hist(std_trace[:, i], color<span style="color:#f92672">=</span>colors[i], bins<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>,
+             histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stepfilled&#34;</span>)
+    <span style="color:#75715e"># plt.autoscale(tight=True)</span>
+
+plt<span style="color:#f92672">.</span>tight_layout()
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92886775-ed0e8680-f44e-11ea-8066-8d9fd22fc375.png" alt="output_26_0"></p>
+<p>MCMC알고리즘은 두 군집의 중심이 각각 120과 200 가까이에 있을 확률이 가장 높다고 제안했습니다. 비슷한 추론이 표준편차에도 적용될 수 있죠.</p>
+<p>TFP에서는 우리의 모델이 할당된 변수들을 marginalize out하기 때문에, MCMC에서 그 변수들의 트레이스가 없습니다.</p>
+<p>대안으로, 밑에서 우리는 할당된 변수들의 사후 예측 분포를 만들고 그것에서 샘플들을 뽑을 수 있습니다.</p>
+<p>이제 이 아이디어를 시각화해보도록 하겠습니다. Y축은 사후 예측 분포에서 뽑힌 우리들의 샘플들을 나타내고, X축은 실제 데이터 지점을 오름차순으로 정렬한 값을 나타냅니다. 빨간 사각형은 군집 0에 할당되었음을 뜻하고 파란 사격형은 군집 1에 할당되었음을 의마합니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 데이터를 텐서에 넣습니다</span>
+data <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>constant(data_,dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32)
+data <span style="color:#f92672">=</span> data[:,tf<span style="color:#f92672">.</span>newaxis]
+
+<span style="color:#75715e"># 이것은 MCMC 체인마다 군집을 만듭니다</span>
+rv_clusters_1 <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Normal(posterior_centers_2_[:, <span style="color:#ae81ff">0</span>], posterior_sds_2_[:, <span style="color:#ae81ff">0</span>])
+rv_clusters_2 <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Normal(posterior_centers_2_[:, <span style="color:#ae81ff">1</span>], posterior_sds_2_[:, <span style="color:#ae81ff">1</span>])
+
+<span style="color:#75715e"># 각각의 군집에 대한 정규화되지 않은 로그 확률을 계산합니다</span>
+cluster_1_log_prob <span style="color:#f92672">=</span> rv_clusters_1<span style="color:#f92672">.</span>log_prob(data) <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>math<span style="color:#f92672">.</span>log(posterior_prob_2_)
+cluster_2_log_prob <span style="color:#f92672">=</span> rv_clusters_2<span style="color:#f92672">.</span>log_prob(data) <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>math<span style="color:#f92672">.</span>log(<span style="color:#ae81ff">1.</span> <span style="color:#f92672">-</span> posterior_prob_2_)
+
+x <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>stack([cluster_1_log_prob, cluster_2_log_prob],axis<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>)
+y <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>math<span style="color:#f92672">.</span>reduce_logsumexp(x,<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)
+
+<span style="color:#75715e"># 할당 확률을 구하기 위한 베이즈 룰: P(cluster = 1 | data) ∝ P(data | cluster = 1) P(cluster = 1)</span>
+log_p_assign_1 <span style="color:#f92672">=</span> cluster_1_log_prob <span style="color:#f92672">-</span> tf<span style="color:#f92672">.</span>math<span style="color:#f92672">.</span>reduce_logsumexp(tf<span style="color:#f92672">.</span>stack([cluster_1_log_prob, cluster_2_log_prob], axis<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>), <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)
+
+<span style="color:#75715e"># MCMC체인들의 평균을 구합니다.</span>
+log_p_assign_1 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>math<span style="color:#f92672">.</span>reduce_logsumexp(log_p_assign_1, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">-</span> tf<span style="color:#f92672">.</span>math<span style="color:#f92672">.</span>log(tf<span style="color:#f92672">.</span>cast(log_p_assign_1<span style="color:#f92672">.</span>shape[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], tf<span style="color:#f92672">.</span>float32))
+ 
+p_assign_1 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>exp(log_p_assign_1)
+p_assign <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>stack([p_assign_1,<span style="color:#ae81ff">1</span><span style="color:#f92672">-</span>p_assign_1],axis<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>)
+
+<span style="color:#75715e"># 그래프를 그리기 위한 작업</span>
+probs_assignments <span style="color:#f92672">=</span> p_assign_1 
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">burned_assignment_trace_ <span style="color:#f92672">=</span> evaluate(tfd<span style="color:#f92672">.</span>Categorical(probs<span style="color:#f92672">=</span>p_assign)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>))
+plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">5</span>))
+plt<span style="color:#f92672">.</span>cmap <span style="color:#f92672">=</span> mpl<span style="color:#f92672">.</span>colors<span style="color:#f92672">.</span>ListedColormap(colors)
+plt<span style="color:#f92672">.</span>imshow(burned_assignment_trace_[:, np<span style="color:#f92672">.</span>argsort(data_)],
+       cmap<span style="color:#f92672">=</span>plt<span style="color:#f92672">.</span>cmap, aspect<span style="color:#f92672">=.</span><span style="color:#ae81ff">4</span>, alpha<span style="color:#f92672">=.</span><span style="color:#ae81ff">9</span>)
+plt<span style="color:#f92672">.</span>xticks(np<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">0</span>, data_<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>], <span style="color:#ae81ff">40</span>),
+       [<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">%.2f</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> s <span style="color:#66d9ef">for</span> s <span style="color:#f92672">in</span> np<span style="color:#f92672">.</span>sort(data_)[::<span style="color:#ae81ff">40</span>]])
+plt<span style="color:#f92672">.</span>ylabel(<span style="color:#e6db74">&#34;사후 표본&#34;</span>)
+plt<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#34;$i$번째 데이터 지점의 값&#34;</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;데이터 지점들의 사후 군집&#34;</span>);
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92886780-eed84a00-f44e-11ea-83fc-9b42a9948433.png" alt="output_29_0"></p>
+<p>위의 그래프를 보면 가장 불확실한 부분은 150과 170 사이에 있다는 것을 알 수 있습니다. 사실 위의 그래프는 약간 잘못 나타내고있는 부분이 있습니다. x축이 실제 스케일이 아니기 때문이죠.(이것은 i번째로 분류된 데이터 지점이 분류된 값을 의미합니다.) 더 명확한 그림은 밑에 있습니다. 여기에서 우리는 각 데이터 지점이 군집 0과 1에 속하는 빈도를 추정할 수 있습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">5</span>))
+
+<span style="color:#75715e"># 이쁜 색깔</span>
+cmap <span style="color:#f92672">=</span> mpl<span style="color:#f92672">.</span>colors<span style="color:#f92672">.</span>LinearSegmentedColormap<span style="color:#f92672">.</span>from_list(<span style="color:#e6db74">&#34;BMH&#34;</span>, colors)
+
+<span style="color:#75715e"># 위에서 만든 그래프를 실행하기</span>
+assign_trace <span style="color:#f92672">=</span> evaluate(probs_assignments)[np<span style="color:#f92672">.</span>argsort(data_)]
+
+<span style="color:#75715e"># 시각화</span>
+plt<span style="color:#f92672">.</span>scatter(data_[np<span style="color:#f92672">.</span>argsort(data_)], assign_trace, cmap<span style="color:#f92672">=</span>cmap,
+        c<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> assign_trace), s<span style="color:#f92672">=</span><span style="color:#ae81ff">50</span>)
+plt<span style="color:#f92672">.</span>ylim(<span style="color:#f92672">-</span><span style="color:#ae81ff">0.05</span>, <span style="color:#ae81ff">1.05</span>)
+plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">35</span>, <span style="color:#ae81ff">300</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;데이터 지점이 군집 0에 속할 확률&#34;</span>)
+plt<span style="color:#f92672">.</span>ylabel(<span style="color:#e6db74">&#34;확률 p&#34;</span>)
+plt<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#34;데이터 지점의 값&#34;</span>);
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92886784-f0a20d80-f44e-11ea-8d0d-56c25d4c6fc5.png" alt="output_31_0"></p>
+<p>우리가 군집을 정규분포를 사용해 모델링했음에도 불구하고, 우리는 데이터에 가장 잘 맞는 모델로 하나의 정규분포를 얻지 않았습니다.(우리가 무엇이 가장 잘 맞는지 정의한 것이 무엇이든).대신 정규분포의 모수의 분포를 얻었죠. 그렇다면 어떻게 우리가 군집분석을 가장 잘 수행하는 노말 분포들의 평균과 분산의 오직 한 쌍의 값을 찾을 수 있을까요?</p>
+<p>하나의 빠르고 더러운 방법은(챕터 5에서 이것이 이론적으로 나이스하단 것을 배울 것입니다.) 사후 분포의 평균을 사용하는 것입니다. 밑에서 우리는 사후 분포의 평균을 정규분포의 모수로 활용해 만든 정규 pdf를 데이터의 그래프와 겹쳐서 그려보도록 하겠습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">x_ <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>linspace(<span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">300</span>, <span style="color:#ae81ff">500</span>)
+posterior_center_means_ <span style="color:#f92672">=</span> evaluate(tf<span style="color:#f92672">.</span>reduce_mean(posterior_centers_2_, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>))
+posterior_std_means_ <span style="color:#f92672">=</span> evaluate(tf<span style="color:#f92672">.</span>reduce_mean(posterior_sds_2_, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>))
+posterior_prob_mean_ <span style="color:#f92672">=</span> evaluate(tf<span style="color:#f92672">.</span>reduce_mean(posterior_prob_2_, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>))
+
+plt<span style="color:#f92672">.</span>hist(data_, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;step&#34;</span>, density<span style="color:#f92672">=</span>True, color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;k&#34;</span>,
+     lw<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;데이터의 히스토그램&#34;</span>)
+y_ <span style="color:#f92672">=</span> posterior_prob_mean_ <span style="color:#f92672">*</span> evaluate(tfd<span style="color:#f92672">.</span>Normal(loc<span style="color:#f92672">=</span>posterior_center_means_[<span style="color:#ae81ff">0</span>],
+                                scale<span style="color:#f92672">=</span>posterior_std_means_[<span style="color:#ae81ff">0</span>])<span style="color:#f92672">.</span>prob(x_))
+plt<span style="color:#f92672">.</span>plot(x_, y_, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 0 (사후 분포의 평균을 사용)&#34;</span>, lw<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+plt<span style="color:#f92672">.</span>fill_between(x_, y_, color<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">1</span>], alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.3</span>)
+
+y_ <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> posterior_prob_mean_) <span style="color:#f92672">*</span> evaluate(tfd<span style="color:#f92672">.</span>Normal(loc<span style="color:#f92672">=</span>posterior_center_means_[<span style="color:#ae81ff">1</span>],
+                                      scale<span style="color:#f92672">=</span>posterior_std_means_[<span style="color:#ae81ff">1</span>])<span style="color:#f92672">.</span>prob(x_))
+plt<span style="color:#f92672">.</span>plot(x_, y_, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;군집 1 (사후분포의 평균을 사용)&#34;</span>, lw<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+plt<span style="color:#f92672">.</span>fill_between(x_, y_, color<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">0</span>], alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.3</span>)
+
+plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper left&#34;</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;군집들을 사후분포의 평균을 사용해 시각화하기&#34;</span>);
+
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92886786-f13aa400-f44e-11ea-88cd-6182de207ecb.png" alt="output_33_0"></p>
+<h2 id="주의-사후-분포에서-뽑은-표본들을-섞지-마세요"><strong>주의! 사후 분포에서 뽑은 표본들을 섞지 마세요!</strong></h2>
+<p>위의 예제에서 확률이 높진 않지만 가능성 있는 시나리오는 군집 0이 아주 큰 표준편차를 가지고 군집 1이 작은 표준편차를 가지는 것입니다. 이것은 비록 우리의 최초의 추론을 만족하진 않지만 여전히 증거에는 만족할 것입니다. 반대로 두 분포가 모두 작은 표준편차를 가질 확률은 극도로 낮을 것입니다. 데이터가 이 가정을 하나도 만족하지 않기 때문이죠. 따라서 두 표준편차는 서로 의존하는 관계입니다. 만일 한 쪽이 작다면 다른 쪽은 반드시 커야만 합니다. 사실 모든 미지수들은 같은 관계로 얽혀있습니다. 거꾸로 말하지면 작은 표준편차는 평균을 작은 구역으로 제한시키죠.</p>
+<p>MCMC 체인이 돌아가는 동안, 우리는 미지의 사후 분포에서 뽑힌 표본을 나타내는 벡터를 반환받습니다. 다른 벡터들에서 나온 원소들은 같이 사용될 수 없죠. 위의 논리를 위배하는 것이기 때문입니다. 만일 하나의 표본이 군집 1이 작은 표준편차를 가지고 있다고 말한다면, 그에 따라 다른 모든 변수들도 그에 맞춰서 조정될 것입니다. 이 문제를 피하는 방법은 쉽습니다. 그저 트레이스들에 알맞은 번호를 붙여주기만 하면 되죠.</p>
+<p>이 부분을 보여주기 위해 간단한 예시를 보여드리도록 하겠습니다. x와 y라는 두 개의 변수가 있고 $x + y = 10$이란 식으로 연결되었다고 합시다. 그리고 $x$를 평균이 4인 정규분포로 모델링하고 500개의 샘플을 뽑아보겠습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">number_of_steps <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span> 
+burnin <span style="color:#f92672">=</span> <span style="color:#ae81ff">500</span> 
+
+<span style="color:#75715e"># 체인의 시작점 설정하기.</span>
+initial_chain_state <span style="color:#f92672">=</span> [
+    tf<span style="color:#f92672">.</span>cast(<span style="color:#ae81ff">1.</span>, tf<span style="color:#f92672">.</span>float32) <span style="color:#f92672">*</span> tf<span style="color:#f92672">.</span>ones([], name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;init_x&#39;</span>, dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32),
+]
+
+
+<span style="color:#75715e"># HMC를 정의합시다</span>
+<span style="color:#75715e"># 우리의 간단한 예제를 위해 단 하나의 분포를 사용하므로 </span>
+<span style="color:#75715e"># HMC의 공간을 제약하거나 정규화되지 않은 log_prb 함수를 사용할 필요가 없습니다. </span>
+<span style="color:#75715e">#</span>
+<span style="color:#75715e"># 만일 당신이 서로 의존하는 사전 분포를 가지고 있을 때는 좋은 예시가 아니겠지만, </span>
+<span style="color:#75715e"># 이것은 단 하나의 변수를 간단한 분포로 설정할 때는 좋은 예시입니다.</span>
+
+
+
+hmc<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>SimpleStepSizeAdaptation(
+    inner_kernel<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>HamiltonianMonteCarlo(
+        target_log_prob_fn<span style="color:#f92672">=</span>tfd<span style="color:#f92672">.</span>Normal(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_x&#34;</span>, loc<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>cast(<span style="color:#ae81ff">4.</span>, tf<span style="color:#f92672">.</span>float32), 
+                                      scale<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>cast(<span style="color:#ae81ff">1.</span><span style="color:#f92672">/</span>np<span style="color:#f92672">.</span>sqrt(<span style="color:#ae81ff">10.</span>), tf<span style="color:#f92672">.</span>float32))<span style="color:#f92672">.</span>log_prob,
+        num_leapfrog_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>,
+        step_size<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>,
+        state_gradients_are_stopped<span style="color:#f92672">=</span>True),
+     num_adaptation_steps<span style="color:#f92672">=</span>int(burnin <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.8</span>)
+)
+
+
+<span style="color:#75715e"># 체인으로부터 샘플 뽑기</span>
+[
+    x_samples,
+], kernel_results <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>sample_chain(
+    num_results <span style="color:#f92672">=</span> number_of_steps,
+    num_burnin_steps <span style="color:#f92672">=</span> burnin,
+    current_state<span style="color:#f92672">=</span>initial_chain_state,
+    kernel<span style="color:#f92672">=</span>hmc,
+    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;HMC_sampling&#39;</span>
+)
+
+y_samples <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> <span style="color:#f92672">-</span> x_samples
+
+<span style="color:#75715e"># 실행시킵시다</span>
+[
+    x_samples_,
+    y_samples_,
+] <span style="color:#f92672">=</span> evaluate([
+    x_samples,
+    y_samples,
+])
+
+plt<span style="color:#f92672">.</span>figure(figsize<span style="color:#f92672">=</span>(<span style="color:#ae81ff">12</span>,<span style="color:#ae81ff">6</span>))
+plt<span style="color:#f92672">.</span>plot(np<span style="color:#f92672">.</span>arange(number_of_steps), x_samples_, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">3</span>], alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.8</span>)
+plt<span style="color:#f92672">.</span>plot(np<span style="color:#f92672">.</span>arange(number_of_steps), y_samples_, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">0</span>], alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.8</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#39;미지수들 사이의 의존성(dependence)의 극단적인 케이스를 보여줍니다&#39;</span>, fontsize<span style="color:#f92672">=</span><span style="color:#ae81ff">14</span>)
+</code></pre></div><pre><code>Text(0.5, 1.0, '미지수들 사이의 의존성(dependence)의 극단적인 케이스를 보여줍니다')
+</code></pre>
+<p><img src="https://user-images.githubusercontent.com/57588650/92886789-f26bd100-f44e-11ea-8047-43cce6bfdc40.png" alt="output_36_1"></p>
+<p>당신이 볼 수 있듯이 두 변수는 겹치지 않습니다. 그리고 x의 i번째 샘플을 y의 j번째 샘플에 넣는 것이 $i = j$가 아닐 경우엔 잘못된 것이 될 것입니다.</p>
+<h2 id="다시-군집분석으로-돌아옵시다--예측"><strong>다시 군집분석으로 돌아옵시다 : 예측</strong></h2>
+<p>위의 군집분석은 $k$개의 군집으로 일반화할 수 있습니다. $k = 2$로 정하는 것은 MCMC 과정을 더 잘 시각화할 수 있게 합니다. 그리고 몇몇 아주 흥미로운 그래프들도 그릴 수 있죠.</p>
+<p>예측은 어떨까요? 우리가 새로운 데이터 지점인 예를 들어 $x = 175$를 관찰했다고 가정합시다. 자 이제 이것을 어떤 군집에 넣어야 할까요? 군집의 중심이 가장 가까운 군집에 할당하는 것은 바보같은 짓입니다. 군집들의 표준편차를 고려하는 것은 아주 중요한 일인데 이것을 무시하기 때문이죠. 더 일반적으로, 우리는 $x = 175$가 군집 1에 할당될 확률에 관심이 있습니다.(우리가 어떤 군집일지를 완벽하게 확신할 수 없기 떄문이죠.) $x$의 할당값을 $L_X$라고 씁시다. 이것은 0 또는 1이겠죠? 그리고 우리가 관심있는 확률을 $P(L_x = 1 | x = 175 )$라고 쓰겠습니다.</p>
+<p>이것을 계산하는 간단한 방법은 새로운 데이터를 추가하고 다시 MCMC를 돌리는 것입니다. 이것의 단점은 각각의 새로운 데이터에서 추론하는데 너무 느리다는 것이죠. 대안으로 우리는 덜 정확하지만 훨씬 빠른 방법을 시도할 수 있습니다.</p>
+<p>이를 위해 베이즈 정리를 사용하도록 하겠습니다. 모두 알듯 베이즈 정리는 다음과 같습니다.</p>
+<p>$$ P( A | X ) = \frac{ P( X  | A )P(A) }{P(X) }$$</p>
+<p>우리의 케이스에서 A은 $L_x = 1$을 나타내고 $X$는 우리가 가진 증거들을 의미합니다. 우리는 $x=175$를 관찰했죠. 우리들의 모수들의 사후 분포에서 뽑은 표본인 ($\mu_0, \sigma_0, \mu_1, \sigma_1, p$)에 대해, 우리가 궁금한 점은 &ldquo;$x$가 군집 1에 할당될 확률이 군집 0에 할당될 확률보다 큰가?&ldquo;입니다. 이 확률은 우리가 고른 모수에 의존하겠죠.</p>
+<p>$$
+\begin{align}
+&amp; P(L_x = 1| x = 175 ) \gt P(L_x = 0| x = 175 )
+\end{align}
+$$
+$$
+\begin{align}
+&amp; \frac{ P( x=175  | L_x = 1  )P( L_x = 1 ) }{P(x = 175) }
+\gt \frac{ P( x=175  | L_x = 0  )P( L_x = 0 )}{P(x = 175) }
+\end{align}
+$$</p>
+<p>분모가 같기 때문에, 무시할 수 있습니다(정말 다행입니다. $P(x = 175)$의 값을 계산하는건 매우 어렵기 때문이죠)</p>
+<p>$$  P( x=175  | L_x = 1  )P( L_x = 1 ) \gt  P( x=175  | L_x = 0  )P( L_x = 0 ) $$</p>
+<p>이제 이걸 구하면 됩니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">p_trace <span style="color:#f92672">=</span> posterior_prob_2_[<span style="color:#ae81ff">25000</span>:]
+
+x <span style="color:#f92672">=</span> <span style="color:#ae81ff">175</span>
+
+v <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> p_trace) <span style="color:#f92672">*</span> evaluate(tfd<span style="color:#f92672">.</span>Normal(loc<span style="color:#f92672">=</span>center_trace[<span style="color:#ae81ff">25000</span>:, <span style="color:#ae81ff">1</span>], 
+                                        scale<span style="color:#f92672">=</span>std_trace[<span style="color:#ae81ff">25000</span>:, <span style="color:#ae81ff">1</span>])<span style="color:#f92672">.</span>log_prob(x)) <span style="color:#f92672">&gt;</span> \
+                                        p_trace <span style="color:#f92672">*</span> evaluate(tfd<span style="color:#f92672">.</span>Normal(loc<span style="color:#f92672">=</span>center_trace[<span style="color:#ae81ff">25000</span>:, <span style="color:#ae81ff">0</span>], \
+                                        scale<span style="color:#f92672">=</span>std_trace[<span style="color:#ae81ff">25000</span>:, <span style="color:#ae81ff">0</span>])<span style="color:#f92672">.</span>log_prob(x))
+    
+
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;군집 1에 속할 확률:&#34;</span>, (v<span style="color:#f92672">.</span>mean()))
+</code></pre></div><pre><code>군집 1에 속할 확률: 0.04028
+</code></pre>
+<p>군집의 번호를 딸랑 출력하는 것 보다 확률을 출력하는 것은 아주 유용한 것입니다. 단순히 <code>확률이 0.5보다 크면 군집 1이고 아니면 0이다</code>라고 하는 것 대신 우리는 우리의 추론을 손실 함수(loss fucntion)을 통해 최적화할 수 있습니다. 5장에서 이것을 설명하도록 하겠습니다.</p>
+
+		</div>
+		<footer class="post__footer">
+			
+<div class="post__tags tags clearfix">
+	<svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/bayesian/" rel="tag">Bayesian</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/tensorflow/" rel="tag">TensorFlow</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/python/" rel="tag">Python</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/clustering/" rel="tag">Clustering</a>
+		</li>
+	</ul>
+</div>
+		</footer>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<div class="authorbox__header">
+		<span class="authorbox__name">About Tai Hwan Oh</span>
+	</div>
+</div>
+
+
+
+			</div>
+			
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 Tai Hwan Oh.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

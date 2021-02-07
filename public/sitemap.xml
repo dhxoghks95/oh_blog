@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>http://example.org/tags/bayesian/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/categories/bayesian-method-with-tensorflow/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/conjugate/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/categories/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/clustering/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/python/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/tensorflow/</loc>
+    <lastmod>2020-10-08T17:17:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/priorexpert/</loc>
+    <lastmod>2020-10-06T20:27:20+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/bayesianmab/</loc>
+    <lastmod>2020-10-03T17:27:06+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/priorintro/</loc>
+    <lastmod>2020-09-22T18:16:07+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/bayesianml2/</loc>
+    <lastmod>2020-09-22T14:22:51+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/bayesianml1/</loc>
+    <lastmod>2020-09-20T15:29:43+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/loss/</loc>
+    <lastmod>2020-09-16T19:37:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/ch4conclusion/</loc>
+    <lastmod>2020-09-15T17:09:45+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/reddit/</loc>
+    <lastmod>2020-09-15T13:04:37+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/lawoflargen/</loc>
+    <lastmod>2020-09-13T20:22:33+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/mcmclast/</loc>
+    <lastmod>2020-09-12T16:12:38+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/bayesiancluster/</loc>
+    <lastmod>2020-09-11T16:48:24+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/mcmcintro/</loc>
+    <lastmod>2020-09-09T16:04:59+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/ch2example/</loc>
+    <lastmod>2020-09-08T18:56:54+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/challenger/</loc>
+    <lastmod>2020-09-06T17:55:36+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/deceit/</loc>
+    <lastmod>2020-09-04T16:28:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/modeling/</loc>
+    <lastmod>2020-09-02T21:09:46+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tfpdist/</loc>
+    <lastmod>2020-09-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/basictf/</loc>
+    <lastmod>2020-08-31T13:56:56+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/dplyr/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/hadoop/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/machine-learning/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/r/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/spark/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/sparklyr/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/sparklyr/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/tidyverse/</loc>
+    <lastmod>2020-08-30T17:15:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/ch1example/</loc>
+    <lastmod>2020-08-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tfp/</loc>
+    <lastmod>2020-08-29T16:59:51+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/distribution/</loc>
+    <lastmod>2020-08-28T15:37:36+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/framework/</loc>
+    <lastmod>2020-08-28T02:25:06+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/introduction/</loc>
+    <lastmod>2020-08-26T23:15:00+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/eda/</loc>
+    <lastmod>2020-06-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/preprocessing/</loc>
+    <lastmod>2020-06-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/%EC%9D%8C%EC%9B%90%EC%B0%A8%ED%8A%B8-%EC%98%88%EC%B8%A1/</loc>
+    <lastmod>2020-06-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://example.org/categories/project/</loc>
+    <lastmod>2020-06-17T00:00:00+00:00</lastmod>
+  </url>
+  
+</urlset>

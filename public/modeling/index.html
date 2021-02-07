@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Bayesian Method with TensorFlow Chapter 2. More on TensorFlow and TensorFlow Probability - 3. Modeling Approaches - Oh Data Science</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+		<meta property="og:title" content="Bayesian Method with TensorFlow Chapter 2. More on TensorFlow and TensorFlow Probability - 3. Modeling Approaches" />
+<meta property="og:description" content="Bayesian Method with TensorFlow - Chapter2 More on TensorFlow and TensorFlow Probability 사전 준비 작업 #@title Imports and Global Variables (make sure to run this cell) { display-mode: &#34;form&#34; } try: # %tensorflow_version only exists in Colab. %tensorflow_version 2.x except Exception: pass from __future__ import absolute_import, division, print_function #@markdown This sets the warning status (default is `ignore`, since this notebook runs correctly) warning_status = &#34;ignore&#34; #@param [&#34;ignore&#34;, &#34;always&#34;, &#34;module&#34;, &#34;once&#34;, &#34;default&#34;, &#34;error&#34;] import warnings warnings." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/modeling/" />
+<meta property="article:published_time" content="2020-09-02T21:09:46+09:00" />
+<meta property="article:modified_time" content="2020-09-02T21:09:46+09:00" />
+
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo">
+		<a class="logo__link" href="/" title="Oh Data Science" rel="home">
+			<div class="logo__item logo__text">
+					<div class="logo__title">Oh Data Science</div>
+					
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Bayesian Method with TensorFlow Chapter 2. More on TensorFlow and TensorFlow Probability - 3. Modeling Approaches</h1>
+			
+		</header><div class="content post__content clearfix">
+			<h1 id="bayesian-method-with-tensorflow---chapter2-more-on-tensorflow-and-tensorflow-probability"><strong>Bayesian Method with TensorFlow - Chapter2 More on TensorFlow and TensorFlow Probability</strong></h1>
+<h3 id="사전-준비-작업">사전 준비 작업</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#@title Imports and Global Variables (make sure to run this cell)  { display-mode: &#34;form&#34; }</span>
+
+<span style="color:#66d9ef">try</span>:
+  <span style="color:#75715e"># %tensorflow_version only exists in Colab.</span>
+  <span style="color:#f92672">%</span>tensorflow_version <span style="color:#ae81ff">2.</span>x
+<span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span>:
+  <span style="color:#66d9ef">pass</span>
+
+
+<span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> absolute_import, division, print_function
+
+
+<span style="color:#75715e">#@markdown This sets the warning status (default is `ignore`, since this notebook runs correctly)</span>
+warning_status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ignore&#34;</span> <span style="color:#75715e">#@param [&#34;ignore&#34;, &#34;always&#34;, &#34;module&#34;, &#34;once&#34;, &#34;default&#34;, &#34;error&#34;]</span>
+<span style="color:#f92672">import</span> warnings
+warnings<span style="color:#f92672">.</span>filterwarnings(warning_status)
+<span style="color:#66d9ef">with</span> warnings<span style="color:#f92672">.</span>catch_warnings():
+    warnings<span style="color:#f92672">.</span>filterwarnings(warning_status, category<span style="color:#f92672">=</span><span style="color:#a6e22e">DeprecationWarning</span>)
+    warnings<span style="color:#f92672">.</span>filterwarnings(warning_status, category<span style="color:#f92672">=</span><span style="color:#a6e22e">UserWarning</span>)
+
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+<span style="color:#f92672">import</span> os
+<span style="color:#75715e">#@markdown This sets the styles of the plotting (default is styled like plots from [FiveThirtyeight.com](https://fivethirtyeight.com/)</span>
+matplotlib_style <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;fivethirtyeight&#39;</span> <span style="color:#75715e">#@param [&#39;fivethirtyeight&#39;, &#39;bmh&#39;, &#39;ggplot&#39;, &#39;seaborn&#39;, &#39;default&#39;, &#39;Solarize_Light2&#39;, &#39;classic&#39;, &#39;dark_background&#39;, &#39;seaborn-colorblind&#39;, &#39;seaborn-notebook&#39;]</span>
+<span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#f92672">as</span> plt; plt<span style="color:#f92672">.</span>style<span style="color:#f92672">.</span>use(matplotlib_style)
+<span style="color:#f92672">import</span> matplotlib.axes <span style="color:#f92672">as</span> axes;
+<span style="color:#f92672">from</span> matplotlib.patches <span style="color:#f92672">import</span> Ellipse
+<span style="color:#f92672">import</span> matplotlib <span style="color:#f92672">as</span> mpl
+<span style="color:#75715e">#%matplotlib inline</span>
+<span style="color:#f92672">import</span> seaborn <span style="color:#f92672">as</span> sns; sns<span style="color:#f92672">.</span>set_context(<span style="color:#e6db74">&#39;notebook&#39;</span>)
+<span style="color:#f92672">from</span> IPython.core.pylabtools <span style="color:#f92672">import</span> figsize
+<span style="color:#75715e">#@markdown This sets the resolution of the plot outputs (`retina` is the highest resolution)</span>
+notebook_screen_res <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;retina&#39;</span> <span style="color:#75715e">#@param [&#39;retina&#39;, &#39;png&#39;, &#39;jpeg&#39;, &#39;svg&#39;, &#39;pdf&#39;]</span>
+<span style="color:#75715e">#%config InlineBackend.figure_format = notebook_screen_res</span>
+
+<span style="color:#f92672">import</span> tensorflow <span style="color:#f92672">as</span> tf
+
+<span style="color:#f92672">import</span> tensorflow_probability <span style="color:#f92672">as</span> tfp
+tfd <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>distributions
+tfb <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>bijectors
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">_TFColor</span>(object):
+    <span style="color:#e6db74">&#34;&#34;&#34;Enum of colors used in TF docs.&#34;&#34;&#34;</span>
+    red <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#F15854&#39;</span>
+    blue <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#5DA5DA&#39;</span>
+    orange <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#FAA43A&#39;</span>
+    green <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#60BD68&#39;</span>
+    pink <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#F17CB0&#39;</span>
+    brown <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#B2912F&#39;</span>
+    purple <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#B276B2&#39;</span>
+    yellow <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#DECF3F&#39;</span>
+    gray <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#4D4D4D&#39;</span>
+    <span style="color:#66d9ef">def</span> __getitem__(self, i):
+        <span style="color:#66d9ef">return</span> [
+            self<span style="color:#f92672">.</span>red,
+            self<span style="color:#f92672">.</span>orange,
+            self<span style="color:#f92672">.</span>green,
+            self<span style="color:#f92672">.</span>blue,
+            self<span style="color:#f92672">.</span>pink,
+            self<span style="color:#f92672">.</span>brown,
+            self<span style="color:#f92672">.</span>purple,
+            self<span style="color:#f92672">.</span>yellow,
+            self<span style="color:#f92672">.</span>gray,
+        ][i <span style="color:#f92672">%</span> <span style="color:#ae81ff">9</span>]
+TFColor <span style="color:#f92672">=</span> _TFColor()
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">session_options</span>(enable_gpu_ram_resizing<span style="color:#f92672">=</span>True, enable_xla<span style="color:#f92672">=</span>False):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    Allowing the notebook to make use of GPUs if they&#39;re available.
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    XLA (Accelerated Linear Algebra) is a domain-specific compiler for linear
+</span><span style="color:#e6db74">    algebra that optimizes TensorFlow computations.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    config <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>config
+    gpu_devices <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span>experimental<span style="color:#f92672">.</span>list_physical_devices(<span style="color:#e6db74">&#39;GPU&#39;</span>)
+    <span style="color:#66d9ef">if</span> enable_gpu_ram_resizing:
+        <span style="color:#66d9ef">for</span> device <span style="color:#f92672">in</span> gpu_devices:
+           tf<span style="color:#f92672">.</span>config<span style="color:#f92672">.</span>experimental<span style="color:#f92672">.</span>set_memory_growth(device, True)
+    <span style="color:#66d9ef">if</span> enable_xla:
+        config<span style="color:#f92672">.</span>optimizer<span style="color:#f92672">.</span>set_jit(True)
+    <span style="color:#66d9ef">return</span> config
+
+session_options(enable_gpu_ram_resizing<span style="color:#f92672">=</span>True, enable_xla<span style="color:#f92672">=</span>True)
+
+<span style="color:#960050;background-color:#1e0010">!</span>apt <span style="color:#f92672">-</span>qq <span style="color:#f92672">-</span>y install fonts<span style="color:#f92672">-</span>nanum
+ 
+<span style="color:#f92672">import</span> matplotlib.font_manager <span style="color:#f92672">as</span> fm
+fontpath <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf&#39;</span>
+font <span style="color:#f92672">=</span> fm<span style="color:#f92672">.</span>FontProperties(fname<span style="color:#f92672">=</span>fontpath, size<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>)
+plt<span style="color:#f92672">.</span>rc(<span style="color:#e6db74">&#39;font&#39;</span>, family<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;NanumBarunGothic&#39;</span>) 
+mpl<span style="color:#f92672">.</span>font_manager<span style="color:#f92672">.</span>_rebuild()
+</code></pre></div><pre><code>fonts-nanum is already the newest version (20170925-1).
+The following package was automatically installed and is no longer required:
+  libnvidia-common-440
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 39 not upgraded.
+</code></pre>
+<h1 id="3-modeling-approaches"><strong>3. Modeling Approaches</strong></h1>
+<p>베이지안 모델링을 함에 있어 좋은 시작은 당신의 데이터가 어떻게 발생했는지 생각하는 것입니다. 당신이 전지전능한 신이라고 가정하고 어떻게 데이터셋을 재생산할지 상상해봅시다.</p>
+<p>지난 챕터에서 우리는 문자 메시지 데이터를 조사해봤습니다. 우리의 관찰값들이 어떻게 발생했는지에 질문을 던지면서 시작해봅시다.</p>
+<ol>
+<li>
+<p>&ldquo;우리의 문자 메시지 갯수 데이터를 가장 잘 표현하는 확률 변수(Random Variable)은 무엇인가?&ldquo;라는 질문에서 시작했습니다. 포아송 확률 변수는 갯수를 세는 데이터를 표현할 수 있기 때문에 좋은 후보라고 할 수 있죠. 그래서 받은 문자 메시지의 갯수를 포아송 분포에서 표본 추출한 것으로 모델링 했습니다.</p>
+</li>
+<li>
+<p>다음으로 &ldquo;자 이제 문자 메시지들이 포아송 분포라고 가정했으니까 포아송 분포에는 어떤 것들이 필요하지?&ldquo;라는 생각을 해봅시다. 여러분도 알듯 포아송 분포는 모수 $\lambda$를 가지고 있습니다</p>
+</li>
+<li>
+<p>우리가 $\lambda$가 무엇인지 아나요? 아닙니다. 실제로 우리는 하나는 초기의 행동, 두 번째는 이후의 행동 이렇게 두 개의 $\lambda$값이 있다는 의심을 가지고 있습니다. 그런데 우리는 언제 그 값이 바뀌는지 모릅니다. 그 변화점을 $\tau$라고 합시다.</p>
+</li>
+<li>
+<p>그렇다면 두 $\lambda$의 분포는 무엇일까요? 양의 실수에 확률을 부여하는 것이기 때문에 지수 분포가 좋을 것입니다. 그런데 지수 분포도 모수를 가지고 있죠? 그것의 이름은 $\alpha$라고 합시다</p>
+</li>
+<li>
+<p>그럼 $\alpha$가 무엇인지 아나요? 모르죠. 지금 상황에서 $\alpha$에도 분포를 부여할 수도 있습니다. 하지만 어느정도 수준이 되면 멈추는 것이 낫습니다. 우리가 $\lambda$에 대한 사전 믿음(예를 들면 시간이 지남에 따라 바뀐다, 10과 30 사이에 있을 것이다 등등)을 가지고 있으므로, $\alpha$에 대해 강한 믿음을 가지고 있지는 않습니다. 그래서 여기에서 멈추는게 가장 좋습니다.</p>
+</li>
+</ol>
+<p>그렇다면 $\alpha$는 어떤 값으로 하는게 좋을까요? 우리는 $\lambda$가 10에서 30 사이라고 생각합니다. 그래서 우리가 $\alpha$를 너무 낮게 설정하면(그 결과 높은 값에 더 큰 확률을 줍니다) 우리의 사전 믿음을 잘 반영하지 못하게 됩니다. 비슷하게 너무 높아도 그렇죠. 그렇기 때문에 우리의 사전 믿음을 $\alpha$에 잘 반영하기 위해서는 값을 $E[\lambda|\alpha]$가 우리의 관측치의 평균과 같게 맞춰 주는 것이 좋습니다. 이것은 지난 장에 다뤘습니다.</p>
+<ol start="6">
+<li>우리는 언제 $\tau$가 발생할지에 대한 전문적인 지식이 없습니다. 그래서 우리는 $\tau$가 discrete Uniform 분포를 따른다고 가정하겠습니다.</li>
+</ol>
+<p>다음은 우리의 생각을 시각화한 것입니다. 화살표는 <code>부모-자식</code>관계를 나타내죠.(출처 : <a href="http://daft-pgm.org/">Daft Python library</a>)</p>
+<p><img src="https://user-images.githubusercontent.com/57588650/91922152-2c7afb80-ed08-11ea-92d9-ea1c63f98ed2.png" alt="SmartSelectImage_2020-09-02-10-36-06"></p>
+<p>TFP, 그리고 다른 확률론적 프로그래밍 언어들은 이러한 데이터 생성 과정을 진행하기 위해 만들어졌습니다. 더 일반적으로 말하자면, B.Cronin은 이렇게 말했습니다.</p>
+<blockquote>
+<p>확률론적 프로그래밍은 비즈니스 분석의 성배 중 하나이자 과학적 설득의 숨은 영웅인 &ldquo;데이터를 말로 설명하는 것&quot;을 가능하게 합니다. 사람들은 이야기의 방식으로 생각합니다. 그렇기 때문에 근거가 있든 없든 &ldquo;일화(anecdote)&ldquo;는 의사 결정에 엄청난 힘을 가지고 있죠. 그러나 현존하는 분석 방법들은 이야기의 방식으로 결과를 도출하는데 많이들 실패합니다. 사람들이 그들의 선택지를 저울질 할 때 더 선호하는 &ldquo;인과관계&quot;에 대해선 거의 아무것도 말할 수 없는 숫자만 결과로 내보낼 뿐이죠</p>
+</blockquote>
+<h3 id="같은-이야기-다른-결말"><strong>같은 이야기, 다른 결말</strong></h3>
+<p>흥미롭게도, 우리는 이야기를 다시 말함으로써 새로운 데이터셋들을 만들 수 있습니다. 예를 들어 우리가 위의 단계들을 거꾸로 거슬러 올라간다면, 데이터의 실현 가능성을 시뮬레이션 할 수 있게 됩니다.</p>
+<ol>
+<li>사용자의 행동 변화가 <code>DiscreteUniform(0, 98)</code>에서 표본 추출 되었을 때로 특정합니다.</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># evaluate 함수 생성</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">evaluate</span>(tensors):
+    <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>executing_eagerly():
+         <span style="color:#66d9ef">return</span> tf<span style="color:#f92672">.</span>nest<span style="color:#f92672">.</span>pack_sequence_as(
+             tensors,
+             [t<span style="color:#f92672">.</span>numpy() <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>is_tensor(t) <span style="color:#66d9ef">else</span> t
+             <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> tf<span style="color:#f92672">.</span>nest<span style="color:#f92672">.</span>flatten(tensors)])
+    <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>Session() <span style="color:#66d9ef">as</span> sess:
+        <span style="color:#66d9ef">return</span> sess<span style="color:#f92672">.</span>run(tensors)
+
+<span style="color:#75715e"># discrete uniform 분포에서 확률론적 변수 생성</span>
+tau <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(shape<span style="color:#f92672">=</span>[<span style="color:#ae81ff">1</span>], minval<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, maxval<span style="color:#f92672">=</span><span style="color:#ae81ff">80</span>, dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>int32)
+
+<span style="color:#75715e"># 그래프를 실행하고 tau_에 저장</span>
+[ tau_ ] <span style="color:#f92672">=</span> evaluate([ tau ])
+
+<span style="color:#75715e"># 출력</span>
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Value of Tau (randomly taken from DiscreteUniform(0, 80)):&#34;</span>, tau_)
+</code></pre></div><pre><code>Value of Tau (randomly taken from DiscreteUniform(0, 80)): [29]
+</code></pre>
+<ol start="2">
+<li>$\lambda_1$과 $\lambda_2$를 $Gamma(\alpha)$ 분포에서 뽑습니다</li>
+</ol>
+<p>NOTE : 감마 분포는 지수 분포를 일반화한 것입니다. Shape parameter $\alpha = 1$과 scale parameter $\beta$를 가진 감마 분포는 $exponential(\beta)$ 분포와 같습니다. 여기서 우리는 지수 분포보다 더 유연한 모델을 만들기 위해 감마 분포를 사용할 것입니다. 0과 1 사이의 값을 반환하는 것 대신에 1보다 더 큰 값을 만들 수도 있죠.(예를 들면 한 사람이 일일 문자 메시지 사용량에 나타날 것으로 예측하는 숫자의 종류)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">alpha <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.</span><span style="color:#f92672">/</span><span style="color:#ae81ff">8.</span>
+
+lambdas  <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Gamma(concentration<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span><span style="color:#f92672">/</span>alpha, rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.3</span>)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>[<span style="color:#ae81ff">2</span>])  
+[ lambda_1_, lambda_2_ ] <span style="color:#f92672">=</span> evaluate( lambdas )
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Lambda 1 (randomly taken from Gamma(α) distribution): &#34;</span>, lambda_1_)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Lambda 2 (randomly taken from Gamma(α) distribution): &#34;</span>, lambda_2_)
+</code></pre></div><pre><code>Lambda 1 (randomly taken from Gamma(α) distribution):  20.318098
+Lambda 2 (randomly taken from Gamma(α) distribution):  37.719265
+</code></pre>
+<ol start="3">
+<li>$\tau$ 이전의 날짜들에 대해선 $Poisson(\lambda_1)$에서 샘플링하고 이후의 날짜들에 대해선 $Poisson(\lambda_2)$에서 샘플링합니다.</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># poisson(lambda_1)에서 뽑은 값과 poisson(lambda_2)에서 뽑은 값을 합칩니다</span>
+data <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>concat([tfd<span style="color:#f92672">.</span>Poisson(rate<span style="color:#f92672">=</span>lambda_1_)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>tau_),
+                      tfd<span style="color:#f92672">.</span>Poisson(rate<span style="color:#f92672">=</span>lambda_2_)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span> (<span style="color:#ae81ff">80</span> <span style="color:#f92672">-</span> tau_))], axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+
+<span style="color:#75715e"># 0~79 까지의 텐서</span>
+days_range <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>range(<span style="color:#ae81ff">80</span>)
+
+<span style="color:#75715e"># 그래프 실행</span>
+[ data_, days_range_ ] <span style="color:#f92672">=</span> evaluate([ data, days_range ])
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Artificial day-by-day user SMS count created by sampling: </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, data_)
+</code></pre></div><pre><code>Artificial day-by-day user SMS count created by sampling: 
+ [24. 26. 19. 17. 20. 15. 19. 18. 20. 22. 23. 18. 24. 24. 17. 23. 20. 25.
+ 21. 17. 24. 29. 25. 20. 17. 19. 25. 19. 23. 41. 35. 31. 29. 40. 33. 36.
+ 36. 41. 34. 44. 40. 32. 26. 38. 36. 36. 39. 32. 39. 33. 42. 31. 34. 41.
+ 39. 30. 42. 40. 35. 41. 51. 36. 35. 38. 42. 33. 51. 46. 46. 43. 44. 39.
+ 33. 53. 39. 42. 31. 45. 36. 46.]
+</code></pre>
+<ol start="4">
+<li>위에서 만들어진 인공 데이터셋으로 시각화 합니다</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>bar(days_range_, data_, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">3</span>])
+<span style="color:#75715e"># 타우 전날에 빨간 표시</span>
+plt<span style="color:#f92672">.</span>bar(tau_ <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>, data_[tau_ <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>], color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;r&#34;</span>, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;사용자의 행동이 변화되었습니다&#34;</span>)
+plt<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#34;Time (days)&#34;</span>)
+plt<span style="color:#f92672">.</span>ylabel(<span style="color:#e6db74">&#34;문자메시지 받은 갯수&#34;</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;인공 데이터셋&#34;</span>)
+plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">80</span>)
+plt<span style="color:#f92672">.</span>legend();
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/91979639-059ce380-ed61-11ea-8fc0-f091272fa7b1.png" alt="output_14_0"></p>
+<p>우리의 가상 데이터가 실제 관찰값들과 달라도 상관 없습니다. 같을 확률은 엄청 낮으니까요. TFP의 엔진은 이 확률을 최대화하는 좋은 모수($\lambda, \tau$)를 찾게끔 설계되었습니다.</p>
+<p>인공 데이터를 만들 수 있다는 점은 우리 모델링의 흥미로운 부작용입니다. 그리고 우리는 이 능력이 베이자안 추론에 있어서 매우 중요한 방법이란것을 알 수 있죠. 밑에서 데이터셋을 몇개 더 만들어 봅시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 자 위의 과정을 하나의 함수로 만들어 봅시다</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">plot_artificial_sms_dataset</span>():
+    <span style="color:#75715e"># tau 만들기   </span>
+    tau <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(shape<span style="color:#f92672">=</span>[<span style="color:#ae81ff">1</span>], 
+                            minval<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, 
+                            maxval<span style="color:#f92672">=</span><span style="color:#ae81ff">80</span>,
+                            dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>int32)
+    
+    <span style="color:#75715e"># lambda 만들기</span>
+    alpha <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.</span><span style="color:#f92672">/</span><span style="color:#ae81ff">8.</span>
+    lambdas  <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Gamma(concentration<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span><span style="color:#f92672">/</span>alpha, rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.3</span>)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>[<span style="color:#ae81ff">2</span>]) 
+    [ lambda_1_, lambda_2_ ] <span style="color:#f92672">=</span> evaluate( lambdas )
+    data <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>concat([tfd<span style="color:#f92672">.</span>Poisson(rate<span style="color:#f92672">=</span>lambda_1_)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>tau),
+                      tfd<span style="color:#f92672">.</span>Poisson(rate<span style="color:#f92672">=</span>lambda_2_)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span> (<span style="color:#ae81ff">80</span> <span style="color:#f92672">-</span> tau))], axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+    
+    <span style="color:#75715e"># 날짜 범위</span>
+    days_range <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>range(<span style="color:#ae81ff">80</span>)
+    
+    <span style="color:#75715e"># 실행하기</span>
+    [ 
+        tau_,
+        data_,
+        days_range_,
+    ] <span style="color:#f92672">=</span> evaluate([ 
+        tau,
+        data,
+        days_range,
+    ])
+    
+    <span style="color:#75715e"># 그래프로 그리기</span>
+    plt<span style="color:#f92672">.</span>bar(days_range_, data_, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">3</span>])
+    plt<span style="color:#f92672">.</span>bar(tau_ <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>, data_[tau_ <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>], color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;r&#34;</span>, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;사용자의 행동이 변화했습니다&#34;</span>)
+    plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">80</span>);
+
+<span style="color:#75715e"># 네 개 만들어봅시다</span>
+plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">8</span>))
+<span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">4</span>):
+    plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">1</span>, i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>)
+    plot_artificial_sms_dataset()
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/91979662-0e8db500-ed61-11ea-99e7-c39a3fc3562b.png" alt="output_17_0"></p>
+<p>다음에 우리는 이것을 추정치를 만들고 우리의 모델이 올바른지를 테스트할 때 어떻게 사용할 수 있을지를 배워봅시다</p>
+<h3 id="예제--베이지안-ab-테스팅"><strong>예제 : 베이지안 A/B 테스팅</strong></h3>
+<p>A/B 테스팅은 두가지 다른 치료 방법의 효용성의 차이를 증명하기 위해 만들어진 통계적인 설계 방법입니다. 예를 들어 제약 회사가 A약과 B약 중 어느쪽이 더 효과적인가를 알고 싶을 때 씁니다. 회사는 실험 중 일부는 A약에 쓸 것이고 나머지는 B약에 쓸 것입니다(보통은 반반으로 하는데 이 가정을 완화해볼 것입니다). 충분한 시도를 해보고, 통계학자는 어떤 약이 더 좋은 결과를 내는지 결정하기 위해 데이터들을 쭉 훑어봅니다.</p>
+<p>비슷하게 프론트엔드 웹 개발자들은 어떤 홈페이지 디자인이 더 많은 매출 또는 관심도를 이끌어낼지에 관심이 있습니다. 그들은 방문자의 일부는 사이트 A로 보내고 일부는 사이트 B로 보냄으로서 그 방문이 매출을 발생시키는지 기록합니다. 데이터는 실시간으로 기록되고 나중에 분석되죠.</p>
+<p>보통 실험 후의 분석은 <em>평균 차이 테스트</em>나 <em>비율 차이 테스트</em> 같은 가설 검정 테스트를 통해 행해집니다. 이러한 방법은 &ldquo;Z-score&rdquo;, 더 헷갈리는 &ldquo;p-value&quot;와 같은 오해를 불러일으키는 값을 반환합니다(저게 뭔지는 물어보지도 마세요). 만일 당신이 통계학 수업을 들었다면 아마 저런 테크닉들을 배웠을거에요(꼭 z-score나 p-value를 배운게 아니더라도). 그리고 당신이 나와 같다면, 그들의 정의에 대해 무언가 불편함을 느꼈을겁니다. 좋습니다. 베이지안 접근 방식은 이 문제에 대해 더 자연스럽게 접근합니다.</p>
+<h3 id="간단한-케이스"><strong>간단한 케이스</strong></h3>
+<p>제가 의학계는 잘 모르기 때문에 홈페이지 개발을 예시로 들겠습니다. 일단 사이트 A에 집중해서 분석을 해보죠. 실제 사용자들이 사이트 A에 접속해서 무언가를 구매할 확률 $0&lt;p_A&lt;1$이 존재한다고 가정합시다. 이것이 실제 사이트 A가 효과적인 정도를 나타낸다고 할 수 있죠. 지금은 이 값은 모르는 값입니다.</p>
+<p>사이트 A가 $N$명의 사람들에게 보여졌고 그 중 $n$명이 그 사이트를 통해 구매를 했다고 해봅시다. 한 사람은 곧바로 $p_A = \frac{n}{N}$라고 결론내릴겁니다. 불행하게도 관측 빈도수 $\frac{n}{N}$은 완벽하게 $p_A$와 같지 않습니다. 사건의 관측된 빈도와 실제 빈도간에 차이가 있기 때문이죠. 실제 빈도는 사건이 발생할 확률이라고 말할 수 있습니다. 예를 들면 주사위를 굴려서 1이 나올 실제 빈도는 $\frac{1}{6}$입니다. 사건의 실제 빈도는 아는 것은 다음과 같습니다.</p>
+<ul>
+<li>구매를 하는 사용자들의 비율</li>
+<li>사회적 속성의 빈도(예를 들면 인종,종교,성별 같은)</li>
+<li>고양이를 기르는 인터넷 사용자의 비율 등등</li>
+</ul>
+<p>이것들은 우리가 자연에 묻는 일반적인 질문입니다. 그러나 자연은 이러한 실제 빈도를 숨기고 있기 떄문에 우리는 관측된 데이터로 그것을 추론할 수 밖에 없습니다.</p>
+<p>관측된 빈도는 우리가 관측한 빈도입니다. 예를 들어 100번 주사위를 굴려서 20번 1이 나왔다면 관측된 빈도는 실제 빈도인 $\frac{1}{6}$과는 다르게 0.2가 되는거죠. 베이지안 통계학을 사용함으로서 우리는 적절한 사전 믿음과 관측된 데이터들로 실제 빈도를 잘 나타내는 값을 추론할 수 있습니다.</p>
+<p>A/B 예제의 측면에서, 우리는 우리가 알고있는 $N$(총 시도 횟수) $n$(사건이 일어난 수)를 사용해 실제 구매자의 빈도인 $p_A$가 무엇인지 구하고 싶습니다.</p>
+<p>베이지안 모델을 만들기 위해서 우리의 미지수에 대해 사전 분포를 할당해야 합니다. 그렇다면 $p_A$가 뭐라고 생각하시나요? 이 예제에서 우리는 $p_A$가 무엇인지에 대한 확실한 믿음이 없습니다. 그래서 지금은 $p_A$가 0과 1 사이에서 uniform 분포를 따른다고 가정하겠습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 0과 1 사이의 uniform 분포를 만듭시다</span>
+rv_p <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;p&#39;</span>)
+</code></pre></div><p>만일 우리가 강한 믿음을 가지고 있다면, 위의 문자메시지 예제와 같은 방법으로 사전 믿음을 만들 수 있습니다.</p>
+<p>이 예제에서 $p_A$를 0.05라고 하고 $N = 1500$ 명의 사용자들이 사이트 A에 방문했다고 합시다. 그리고 그들이 구매를 할지 안할지를 시뮬레이션 해봅시다. $N$번의 시도에서 이것을 시뮬레이션하기 위해 베르누이 분포를 사용하도록 하겠습니다. 만일 $X \sim Ber(p)$라면 $X$는 $p$의 확률로 1이고 $1-p$의 확률로 0이 되죠. 물론 현실에서는 $p_A$가 뭔지 모릅니다. 하지만 데이터를 시뮬레이션 하기 위해서 일단 쓰도록 하겠습니다. 이제 우리는 다음과 같은 모델을 사용할 수 있다고 가정할 수 있습니다.</p>
+<p>$$\begin{align*}
+p &amp;\sim \text{Uniform}[\text{low}=0,\text{high}=1) \<br>
+X\ &amp;\sim \text{Bernoulli}(\text{prob}=p) \<br>
+\text{for }  i &amp;= 1\ldots N:\text{# Users}  \<br>
+X_i\ &amp;\sim \text{Bernoulli}(p_i)
+\end{align*}$$</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#상수를 설정합니다</span>
+prob_true <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.05</span>  <span style="color:#75715e"># 실제론 이 값을 모른다는걸 기억해놓읍시다</span>
+N <span style="color:#f92672">=</span> <span style="color:#ae81ff">1500</span>
+
+<span style="color:#75715e"># Ber(0.05)에서 N개의 샘플들을 뽑습니다</span>
+<span style="color:#75715e"># 각각의 변수들은 0.05의 확률로 1이 됩니다</span>
+<span style="color:#75715e"># 이것을 데이터 생성 과정이라고 부릅니다</span>
+
+occurrences <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(probs<span style="color:#f92672">=</span>prob_true)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>N, seed<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>)
+occurrences_sum <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>reduce_sum(occurrences)
+occurrences_mean <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>reduce_mean(tf<span style="color:#f92672">.</span>cast(occurrences,tf<span style="color:#f92672">.</span>float32))
+
+<span style="color:#75715e"># 실행합시다</span>
+[ 
+    occurrences_,
+    occurrences_sum_,
+    occurrences_mean_,
+] <span style="color:#f92672">=</span> evaluate([ 
+    occurrences, 
+    occurrences_sum,
+    occurrences_mean,
+])
+
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Array of {} Occurences:&#34;</span><span style="color:#f92672">.</span>format(N), occurrences_) 
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;(Remember: Python treats True == 1, and False == 0)&#34;</span>)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Sum of (True == 1) Occurences:&#34;</span>, occurrences_sum_)
+</code></pre></div><pre><code>Array of 1500 Occurences: [0 0 0 ... 0 0 0]
+(Remember: Python treats True == 1, and False == 0)
+Sum of (True == 1) Occurences: 74
+</code></pre>
+<p>관측된 빈도는 다음과 같습니다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Occurrences.mean은 n/N과 같습니다.</span>
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;What is the observed frequency in Group A? </span><span style="color:#e6db74">%.4f</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> occurrences_mean_)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Does this equal the true frequency? </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> (occurrences_mean_ <span style="color:#f92672">==</span> prob_true))
+</code></pre></div><pre><code>What is the observed frequency in Group A? 0.0493
+Does this equal the true frequency? False
+</code></pre>
+<p>이제 우리는 우리의 베르누이 분포와 관측 데이터들을 두 값들을 기반으로 한 로그 확률 함수에 넣을 수 있습니다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">joint_log_prob</span>(occurrences, prob_A):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    Joint log probability(결합 로그 확률) 최적화 함수
+</span><span style="color:#e6db74">        
+</span><span style="color:#e6db74">    Args:
+</span><span style="color:#e6db74">      occurrences: 0과 1의 값을 가지는 이진 값. 관측 빈도를 나타냅니다
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">      prob_A: 1이 나타날 확률의 스칼라 추정치입니다
+</span><span style="color:#e6db74">    Returns: 
+</span><span style="color:#e6db74">      모든 사전 믿음과 조건부 분포에서의 결합 로그 확률의 합을 반환합니다
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>  
+    rv_prob_A <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)
+    rv_occurrences <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(probs<span style="color:#f92672">=</span>prob_A)
+    <span style="color:#66d9ef">return</span> (
+        rv_prob_A<span style="color:#f92672">.</span>log_prob(prob_A)
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_occurrences<span style="color:#f92672">.</span>log_prob(occurrences))
+    )
+</code></pre></div><p>확률론적인 추론의 목적은 당신이 관측한 데이터를 설명할 수 있는 모델의 모수를 찾는 것입니다. TFP는 <code>joint_log_prob</code>를 사용해 모델의 모수를 평가함으로써 확률론적인 추론을 수행합니다. <code>joint_model_prob</code>의 argument들은 데이터와  <code>joint_model_prob</code> 함수 안에서 스스로 정의될 모델의 모수들입니다. 함수는 넣어진 arguments들에 따라 관측 데이터를 만드는 것 처럼 모델이 매개변수화(하나의 표현식에 대해 다른 parameter를 사용하여 다시 표현하는 것) 될 로그 결합 확률을 반환합니다.</p>
+<p>모든 <code>joint_log_prob</code> 함수들은 같은 구조를 가지고 있습니다.</p>
+<ol>
+<li>
+<p>함수는 평가하기 위한 투입값들의 집합을 가지고 있습니다. 각각의 투입값은 관측된 값이거나 모델의 모수입니다.</p>
+</li>
+<li>
+<p><code>joint_log_prob</code> 함수는 투입값들을 평가하기 위해 확률 분포를 사용해 <strong>모델</strong>을 정의합니다. 이러한 분포들은 투입값의 우도(likelihood)를 측정합니다. (전통적으로 <code>foo</code>라는 변수의 우도를 측정하는 분포는 <code>rv_foo</code>와 같이 이름붙여졌습니다. 이것이 확률 변수(random variable)임에 주목합시다) 우리는 두 종류의 분포를 <code>joint_log_prob</code> 함수에 쓸 것입니다.</p>
+<p>a. <strong>사전 분포</strong>는 투입값들의 우도를 측정합니다. 사전분포는 절대 투입값에 의존하지 않습니다. 각각의 사전 분포는 단 하나의 투입값의 우도를 측정합니다. 각각의 직접적으로 관측되지 않은 미지의 변수들은 상응하는 사전 믿음을 필요로 합니다. 어떤 값들이 합리적인지에 대한 믿음은 사전 분포를 걸정합니다. 사전 믿음을 정하는건 어려울 수 있습니다. 그래서 우리는 6장에서 그것을 더 깊이 알아보도록 하겠습니다.</p>
+<p>b. <strong>조건부 분포</strong>는 다른 투입값이 주어졌을 때 투입값의 우도를 측정합니다. 보통 조건부 분포는 현재 모델에 대한 추정 모수가 주어졌을 때 관찰값의 우도를 반환합니다. 즉 <code>P(관측된 데이터 | 모델의 모수들)</code> 을 반환하는거죠.</p>
+</li>
+<li>
+<p>마지막으로 투입값들의 결합 로그 확률을 계산하고 반환합니다. 결합 로그 확률은 모든 사전, 조건부 분포에서 만들어진 로그 확률을 더한 값입니다. (확률들의 곱이 아니라 로그 확률들의 합으로 나타내는건 숫자의 안전성을 위해섭니다. 컴퓨터에서는 매우 작은 소숫점으로 나타내어진 숫자들은 표현할 수 없기 때문에 그들이 로그 공간 안에 있지 않더라도 결합 로그 확률로 계산할 필요가 있습니다.) 확률들의 합은 사실 정규화된 밀도가 아닙니다. 하지만 그들의 총 합이 1이 아님에도 불구하고 확률들의 합은 실제 확률 밀도에 비례합니다. 그래서 이 비례 분포는 가능한 투입값들의 분포를 추정하는데 충분합니다.</p>
+</li>
+</ol>
+<p>이것들을 위의 코드에 넣어보도록 하겠습니다. 이 예제에서 투입값들은 <code>occurrences</code>에 있는 관측값들과 <code>prob_A</code>의 미지의 값입니다. <code>joint_log_prob</code>함수는 현재의 <code>prob_A</code>에 대한 예측값을 활용해 &ldquo;만일 <code>prob_A</code>가 <code>occurrence</code>의 확률일 때 그 데이터가 얼마나 그럴듯한가?&ldquo;라는 질문에 답을 내놓습니다. 그 답은 두 가지 분포에 의존합니다.</p>
+<ol>
+<li>
+<p>사전 분포 <code>rv_prob_A</code>는 현재 <code>prob_A</code>의 값 자신이 얼마나 그럴듯한지를 보여줍니다.</p>
+</li>
+<li>
+<p>조건부 분포 <code>rv_occurrences</code>는 <code>prob_A</code>가 베르누이 분포에서의 확률 $p$일 때 <code>occurrences</code>의 우도를 나타냅니다.</p>
+</li>
+</ol>
+<p>이러한 확률들의 로그합이 결합 로그 확률입니다.</p>
+<p><code>joint_log_prob</code>는 특히 <code>tfp.mcmc</code>모듈과 결합되어 사용할 때 유용합니다. Markov Chain Monte Carlo(MCMC) 알고리즘은 미지의 투입값에 대한 학습된 추정값을 만들고 이 argument들의 집합의 우도가 무엇인지 계산하는 방식으로 진행됩니다.(어떻게 그러한 추정값을 만드는지는 chapter 3에서 다루도록 하겠습니다) 이 과정을 계속 반복함으로써 MCMC는 가능한 모수들의 분포를 만들어냅니다. 이 분포를 만드는 것이 확률론적 추론의 목적이라고 할 수 있죠.</p>
+<p>자 이제 우리의 추론 알고리즘을 실행해봅시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">number_of_steps <span style="color:#f92672">=</span> <span style="color:#ae81ff">48000</span> 
+burnin <span style="color:#f92672">=</span> <span style="color:#ae81ff">25000</span> 
+leapfrog_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> 
+
+<span style="color:#75715e"># 체인의 시작점을 설정합시다</span>
+initial_chain_state <span style="color:#f92672">=</span> [
+    tf<span style="color:#f92672">.</span>reduce_mean(tf<span style="color:#f92672">.</span>cast(occurrences, tf<span style="color:#f92672">.</span>float32)) 
+    <span style="color:#f92672">*</span> tf<span style="color:#f92672">.</span>ones([], dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;init_prob_A&#34;</span>)
+]
+
+<span style="color:#75715e"># HMC는 과도하게 제약이 없는 공간을 만들기 때문에 샘플들을 실제 공간에 있도록 변환해야 합니다</span>
+unconstraining_bijectors <span style="color:#f92672">=</span> [
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity()   <span style="color:#75715e"># 실수에서 실수로 보냅니다</span>
+]
+
+<span style="color:#75715e"># 우리의 joint_log_prob의 클로저를 만듭니다</span>
+<span style="color:#75715e"># 클로저는 HMC가 &#39;occurrences&#39;를 바꾸지 않게 만들지만 </span>
+<span style="color:#75715e"># 대신에 우리가 관찰한 `occurrences`를 만들 수도 있는 다른 모수들의 분포를 결정합니다</span>
+unnormalized_posterior_log_prob <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> <span style="color:#f92672">*</span>args: joint_log_prob(occurrences, <span style="color:#f92672">*</span>args)
+
+<span style="color:#75715e"># step size를 결정합니다</span>
+step_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.5</span>
+    
+
+<span style="color:#75715e"># HMC를 정합니다</span>
+hmc <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>TransformedTransitionKernel(
+    inner_kernel<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>HamiltonianMonteCarlo(
+        target_log_prob_fn<span style="color:#f92672">=</span>unnormalized_posterior_log_prob,
+        num_leapfrog_steps<span style="color:#f92672">=</span>leapfrog_steps,
+        step_size<span style="color:#f92672">=</span>step_size,
+        state_gradients_are_stopped<span style="color:#f92672">=</span>True),
+    bijector<span style="color:#f92672">=</span>unconstraining_bijectors)
+hmc <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>SimpleStepSizeAdaptation(inner_kernel<span style="color:#f92672">=</span>hmc, num_adaptation_steps<span style="color:#f92672">=</span>int(burnin <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.8</span>))
+
+<span style="color:#75715e"># 체인에서 샘플을 만듭니다</span>
+[
+    posterior_prob_A
+], kernel_results <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>sample_chain(
+    num_results<span style="color:#f92672">=</span>number_of_steps,
+    num_burnin_steps<span style="color:#f92672">=</span>burnin,
+    current_state<span style="color:#f92672">=</span>initial_chain_state,
+    kernel<span style="color:#f92672">=</span>hmc)
+
+</code></pre></div><h3 id="사후-분포에서-샘플을-뽑기-위해-tf-그래프를-실행합니다"><strong>사후 분포에서 샘플을 뽑기 위해 TF 그래프를 실행합니다</strong></h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">[
+    posterior_prob_A_,
+    kernel_results_,
+] <span style="color:#f92672">=</span> evaluate([
+    posterior_prob_A,
+    kernel_results,
+])
+
+<span style="color:#75715e"># burnin 다음부터 출력합니다</span>
+burned_prob_A_trace_ <span style="color:#f92672">=</span> posterior_prob_A_[burnin:]
+</code></pre></div><p>미지의 $p_A$의 사후 분포 그래프를 그려봅시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">4</span>))
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;Posterior distribution of $p_A$, the true effectiveness of site A&#34;</span>)
+plt<span style="color:#f92672">.</span>vlines(prob_true, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">90</span>, linestyle<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--&#34;</span>, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true $p_A$ (unknown)&#34;</span>)
+plt<span style="color:#f92672">.</span>hist(burned_prob_A_trace_, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">25</span>, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stepfilled&#34;</span>, density<span style="color:#f92672">=</span>True)
+plt<span style="color:#f92672">.</span>legend();
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/91979712-1ea59480-ed61-11ea-8b9f-48d0c13b0a70.png" alt="output_37_0"></p>
+<p>우리의 사후 분포는 실제 $p_A$근처에 대부분의 가중치를 주지만, 꼬리에도 가중치가 존재합니다. 이것이 우리의 관찰치가 주어졌을 때 우리가 얼마나 불확실해야하는지를 알려줍니다. 관찰의 갯수인 $N$을 바꿔봅시다. 그리고 사후 분포가 어떻게 바뀌는지 확인해봅시다.</p>
+<h2 id="a와-b-같이-해보기"><strong>A와 B 같이 해보기</strong></h2>
+<p>사이트 B에서도 $p_B$를 찾기 위해 비슷한 분석을 할 수 있습니다. 그러나 우리가 궁금한 것은 $p_A$와 $p_B$의 차이이기 때문에 $\delta = p_A - p_B$도 동시에 추론해보도록 하겠습니다. 자 이것을 TFP의 결정론적인 변수들을 활용해 해보도록 하겠습니다.(우리는 이 예제를 위해 $p_B$를 0.04라고 가정하겠습니다. $p_A$가 0.05였으니 $\delta$는 0.01이 되겠죠. $N_B$는 750이라고 하겠습니다($N_A$보다 상당히 작습니다) 그리고 위에서 사이트 A의 데이터를 시뮬레이션 한 것 처럼 사이트 B에도 시뮬레이션 하겠습니다). 우리의 모델은 이제 다음과 같습니다</p>
+<p>$$\begin{align*}
+p_A &amp;\sim \text{Uniform}[\text{low}=0,\text{high}=1) \<br>
+p_B &amp;\sim \text{Uniform}[\text{low}=0,\text{high}=1) \<br>
+X\ &amp;\sim \text{Bernoulli}(\text{prob}=p) \<br>
+\text{for }  i &amp;= 1\ldots N: \<br>
+X_i\ &amp;\sim \text{Bernoulli}(p_i)
+\end{align*}$$</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#이 두 값들은 우리에겐 미지수 입니다</span>
+true_prob_A_ <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.05</span>
+true_prob_B_ <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.04</span>
+
+<span style="color:#75715e"># 샘플 사이즈가 다르다는 것에 주목합시다. 베이지안 추론에서는 상관 없습니다.</span>
+N_A_ <span style="color:#f92672">=</span> <span style="color:#ae81ff">1500</span>
+N_B_ <span style="color:#f92672">=</span> <span style="color:#ae81ff">750</span>
+
+<span style="color:#75715e"># 관찰값들을 만듭시다</span>
+observations_A <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;obs_A&#34;</span>, 
+                          probs<span style="color:#f92672">=</span>true_prob_A_)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>N_A_)
+observations_B <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;obs_B&#34;</span>, 
+                          probs<span style="color:#f92672">=</span>true_prob_B_)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>N_B_)
+[ 
+    observations_A_,
+    observations_B_,
+] <span style="color:#f92672">=</span> evaluate([ 
+    observations_A, 
+    observations_B, 
+])
+
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Obs from Site A: &#34;</span>, observations_A_[:<span style="color:#ae81ff">30</span>], <span style="color:#e6db74">&#34;...&#34;</span>)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Observed Prob_A: &#34;</span>, np<span style="color:#f92672">.</span>mean(observations_A_), <span style="color:#e6db74">&#34;...&#34;</span>)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Obs from Site B: &#34;</span>, observations_B_[:<span style="color:#ae81ff">30</span>], <span style="color:#e6db74">&#34;...&#34;</span>)
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Observed Prob_B: &#34;</span>, np<span style="color:#f92672">.</span>mean(observations_B_))
+</code></pre></div><pre><code>Obs from Site A:  [0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0] ...
+Observed Prob_A:  0.059333333333333335 ...
+Obs from Site B:  [0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0] ...
+Observed Prob_B:  0.048
+</code></pre>
+<p>밑에서 새로운 모델을 만듭시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">delta</span>(prob_A, prob_B):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    결정론적인 델타 함수를 정의합니다. 이것이 우리가 관심 있는 값입니다
+</span><span style="color:#e6db74">        
+</span><span style="color:#e6db74">    Args:
+</span><span style="color:#e6db74">      prob_A: 사이트 A에서 사건이 발생할 확률
+</span><span style="color:#e6db74">      prob_B: 사이트 B에서 사건이 발생할 확률
+</span><span style="color:#e6db74">    Returns: 
+</span><span style="color:#e6db74">      prob_A와 prob_B의 차이
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    <span style="color:#66d9ef">return</span> prob_A <span style="color:#f92672">-</span> prob_B
+
+  
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">double_joint_log_prob</span>(observations_A, observations_B, 
+                   prob_A, prob_B):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    결합 로그 확률 최적화 함수
+</span><span style="color:#e6db74">        
+</span><span style="color:#e6db74">    Args:
+</span><span style="color:#e6db74">      observations_A: 구매했으면 1, 아니면 0인 사이트 A에서 뽑은 데이터(array)
+</span><span style="color:#e6db74">      observations_B: 구매했으면 1, 아니면 0인 사이트 B에서 뽑은 데이터(array)
+</span><span style="color:#e6db74">      prob_A: 사이트 A에서 사건이 발생할 확률
+</span><span style="color:#e6db74">      prob_B: 사이트 B에서 사건이 발생할 확률
+</span><span style="color:#e6db74">    Returns: 
+</span><span style="color:#e6db74">      Joint log probability optimization function.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    tfd <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>distributions
+  
+    rv_prob_A <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)
+    rv_prob_B <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)
+  
+    rv_obs_A <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(probs<span style="color:#f92672">=</span>prob_A)
+    rv_obs_B <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(probs<span style="color:#f92672">=</span>prob_B)
+  
+    <span style="color:#66d9ef">return</span> (
+        rv_prob_A<span style="color:#f92672">.</span>log_prob(prob_A)
+        <span style="color:#f92672">+</span> rv_prob_B<span style="color:#f92672">.</span>log_prob(prob_B)
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_obs_A<span style="color:#f92672">.</span>log_prob(observations_A))
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_obs_B<span style="color:#f92672">.</span>log_prob(observations_B))
+    )
+
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">number_of_steps <span style="color:#f92672">=</span> <span style="color:#ae81ff">37200</span> <span style="color:#75715e">#@param {type:&#34;slider&#34;, min:2000, max:50000, step:100}</span>
+<span style="color:#75715e">#@markdown (Default is 18000).</span>
+burnin <span style="color:#f92672">=</span> <span style="color:#ae81ff">1000</span> <span style="color:#75715e">#@param {type:&#34;slider&#34;, min:0, max:30000, step:100}</span>
+<span style="color:#75715e">#@markdown (Default is 1000).</span>
+leapfrog_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> <span style="color:#75715e">#@param {type:&#34;slider&#34;, min:1, max:9, step:1}</span>
+<span style="color:#75715e">#@markdown (Default is 6).</span>
+
+
+<span style="color:#75715e"># Set the chain&#39;s start state.</span>
+initial_chain_state <span style="color:#f92672">=</span> [    
+    tf<span style="color:#f92672">.</span>reduce_mean(tf<span style="color:#f92672">.</span>cast(observations_A, tf<span style="color:#f92672">.</span>float32)) <span style="color:#f92672">*</span> tf<span style="color:#f92672">.</span>ones([], dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;init_prob_A&#34;</span>),
+    tf<span style="color:#f92672">.</span>reduce_mean(tf<span style="color:#f92672">.</span>cast(observations_B, tf<span style="color:#f92672">.</span>float32)) <span style="color:#f92672">*</span> tf<span style="color:#f92672">.</span>ones([], dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;init_prob_B&#34;</span>)
+]
+
+<span style="color:#75715e"># Since HMC operates over unconstrained space, we need to transform the</span>
+<span style="color:#75715e"># samples so they live in real-space.</span>
+unconstraining_bijectors <span style="color:#f92672">=</span> [
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity(),   <span style="color:#75715e"># Maps R to R.</span>
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Identity()    <span style="color:#75715e"># Maps R to R.</span>
+]
+
+<span style="color:#75715e"># Define a closure over our joint_log_prob.</span>
+unnormalized_posterior_log_prob <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> <span style="color:#f92672">*</span>args: double_joint_log_prob(observations_A, observations_B, <span style="color:#f92672">*</span>args)
+
+<span style="color:#75715e"># Initialize the step_size. (It will be automatically adapted.)</span>
+step_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.5</span>
+<span style="color:#75715e"># Defining the HMC</span>
+hmc<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>TransformedTransitionKernel(
+    inner_kernel<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>HamiltonianMonteCarlo(
+        target_log_prob_fn<span style="color:#f92672">=</span>unnormalized_posterior_log_prob,
+        num_leapfrog_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>,
+        step_size<span style="color:#f92672">=</span>step_size,
+        state_gradients_are_stopped<span style="color:#f92672">=</span>True),
+    bijector<span style="color:#f92672">=</span>unconstraining_bijectors)
+
+hmc <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>SimpleStepSizeAdaptation(inner_kernel<span style="color:#f92672">=</span>hmc, num_adaptation_steps<span style="color:#f92672">=</span>int(burnin <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.8</span>))
+
+<span style="color:#75715e"># Sample from the chain.</span>
+[
+    posterior_prob_A,
+    posterior_prob_B
+], kernel_results <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>sample_chain(
+    num_results<span style="color:#f92672">=</span>number_of_steps,
+    num_burnin_steps<span style="color:#f92672">=</span>burnin,
+    current_state<span style="color:#f92672">=</span>initial_chain_state,
+    kernel<span style="color:#f92672">=</span>hmc)
+</code></pre></div><h3 id="사후-분포에서-샘플을-뽑기-위해-tf-그래프를-실행합니다-1"><strong>사후 분포에서 샘플을 뽑기 위해 TF 그래프를 실행합니다</strong></h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">[
+    posterior_prob_A_,
+    posterior_prob_B_,
+    kernel_results_
+] <span style="color:#f92672">=</span> evaluate([
+    posterior_prob_A,
+    posterior_prob_B,
+    kernel_results
+])
+
+burned_prob_A_trace_ <span style="color:#f92672">=</span> posterior_prob_A_[burnin:]
+burned_prob_B_trace_ <span style="color:#f92672">=</span> posterior_prob_B_[burnin:]
+burned_delta_trace_ <span style="color:#f92672">=</span> (posterior_prob_A_ <span style="color:#f92672">-</span> posterior_prob_B_)[burnin:]
+</code></pre></div><p>세 미지수의 사후 분포를 그래프로 그려봅시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">12.5</span>))
+
+<span style="color:#75715e">#histogram of posteriors</span>
+
+ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">311</span>)
+
+plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">0</span>, <span style="color:#f92672">.</span><span style="color:#ae81ff">1</span>)
+plt<span style="color:#f92672">.</span>hist(burned_prob_A_trace_, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;stepfilled&#39;</span>, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">25</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.85</span>,
+         label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;posterior of $p_A$&#34;</span>, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">0</span>], density<span style="color:#f92672">=</span>True)
+plt<span style="color:#f92672">.</span>vlines(true_prob_A_, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">80</span>, linestyle<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--&#34;</span>, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true $p_A$ (unknown)&#34;</span>)
+plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper right&#34;</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;Posterior distributions of $p_A$, $p_B$, and delta unknowns&#34;</span>)
+
+ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">312</span>)
+
+plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">0</span>, <span style="color:#f92672">.</span><span style="color:#ae81ff">1</span>)
+plt<span style="color:#f92672">.</span>hist(burned_prob_B_trace_, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;stepfilled&#39;</span>, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">25</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.85</span>,
+         label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;posterior of $p_B$&#34;</span>, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">2</span>], density<span style="color:#f92672">=</span>True)
+plt<span style="color:#f92672">.</span>vlines(true_prob_B_, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">80</span>, linestyle<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--&#34;</span>, label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true $p_B$ (unknown)&#34;</span>)
+plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper right&#34;</span>)
+
+ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplot(<span style="color:#ae81ff">313</span>)
+plt<span style="color:#f92672">.</span>hist(burned_delta_trace_, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;stepfilled&#39;</span>, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.85</span>,
+         label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;posterior of delta&#34;</span>, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">6</span>], density<span style="color:#f92672">=</span>True)
+plt<span style="color:#f92672">.</span>vlines(true_prob_A_ <span style="color:#f92672">-</span> true_prob_B_, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">60</span>, linestyle<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--&#34;</span>,
+           label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true delta (unknown)&#34;</span>)
+plt<span style="color:#f92672">.</span>vlines(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">60</span>, color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;black&#34;</span>, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.2</span>)
+plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper right&#34;</span>);
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/91979745-2bc28380-ed61-11ea-8ef1-3f47544aec4c.png" alt="output_48_0"></p>
+<p>$N_B$ &lt; $N_A$이기 때문에, 즉 사이트 B의 데이터가 더 적기 때문에 $p_B$의 사후분포가 더 평평하다는 것에 주목해봅시다. 이것은 $p_B$의 실제 값에 대한 확신이 $p_A$의 실제 값에 대한 확신 보다 덜 믿음직하단 얘깁니다.</p>
+<p>$delta$의 사후분포 측면에서 보면 대부분의 분포가 $delta = 0$ 보다 위에 있다는 것을 알 수 있습니다. 이것은 사이트 A의 응답률이 사이트 B의 응답률보다 더 높을 가능성이 높다는 것을 의미합니다. 이 추론이 틀릴 확률은 쉽게 계산할 수 있습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Count the number of samples less than 0, i.e. the area under the curve</span>
+<span style="color:#75715e"># before 0, represent the probability that site A is worse than site B.</span>
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Probability site A is WORSE than site B: </span><span style="color:#e6db74">%.3f</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> \
+    np<span style="color:#f92672">.</span>mean(burned_delta_trace_ <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>))
+
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Probability site A is BETTER than site B: </span><span style="color:#e6db74">%.3f</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> \
+    np<span style="color:#f92672">.</span>mean(burned_delta_trace_ <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>))
+</code></pre></div><pre><code>Probability site A is WORSE than site B: 0.137
+Probability site A is BETTER than site B: 0.863
+</code></pre>
+<p>만일 추론이 틀릴 확률이 편안하게 결정하기엔 너무 크다면, 우리는 사이트 B에서 더 많은 데이터를 만들어낼 수 있습니다.(사이트 B가 처음에 샘플의 수가 적었기 때문에 사이트 B의 데이터를 더 추가하는 것이 사이트 A의 데이터를 더 추가하는 것 보다 더 큰 추론의 &lsquo;힘&rsquo;을 얻을 수 있습니다)</p>
+<p><code>true_prob_A</code>, <code>true_prob_B</code>, <code>N_A</code>, <code>N_B</code>를 바꿔보면서 사후 $delta$가 어떻게 생겼는지 봐봅시다. 사후 $delta$의 분포가 $N_A$, $N_B$에는 영향을 받지 않는다는 것에 주목합시다. 이것은 베이지안 분석에 자연스럽게 일치합니다.</p>
+<p>저는 독자들이 이 스타일의 A/B 테스팅을 가설 검정보다 더 자연스럽게 느끼길 바랍니다. 이후 포스팅에서 우리는 이 모델의 두 가지 확장판을 배울 것입니다. 첫 번째는 나쁜 사이트들에 능동적으로 적응하도록 돕는 것이고 두 번째는 단 하나의 식으로 분석을 줄임으로서 이 계산의 속도를 빠르게 하는 것입니다.(해보시면 알겠지만, MCMC를 하는데 굉장히 오래 걸렸습니다 ㅠ)</p>
+
+		</div>
+		<footer class="post__footer">
+			
+<div class="post__tags tags clearfix">
+	<svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/bayesian/" rel="tag">Bayesian</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/tensorflow/" rel="tag">TensorFlow</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/python/" rel="tag">Python</a>
+		</li>
+	</ul>
+</div>
+		</footer>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<div class="authorbox__header">
+		<span class="authorbox__name">About Tai Hwan Oh</span>
+	</div>
+</div>
+
+
+
+			</div>
+			
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 Tai Hwan Oh.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>dplyr on Oh Data Science</title>
+    <link>http://example.org/tags/dplyr/</link>
+    <description>Recent content in dplyr on Oh Data Science</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 30 Aug 2020 17:15:21 +0900</lastBuildDate><atom:link href="http://example.org/tags/dplyr/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Sparklyr로 R에서 Spark 분산처리 활용해 기계학습 진행하기 - 1. sparklyr 소개</title>
+      <link>http://example.org/sparklyr/</link>
+      <pubDate>Sun, 30 Aug 2020 17:15:21 +0900</pubDate>
+      
+      <guid>http://example.org/sparklyr/</guid>
+      <description>Sparklyr로 R에서 Spark 분산처리 활용해 기계학습 진행하기  1. sparklyr 소개 이 포스트는 Tidyverse Korea의
+sparklyr, dplyr, 그리고 기계학습 문서를 토대로 작성되었습니다.
+ 0) 로컬 컴퓨터에 스파크 설치하기 로컬 컴퓨터에 스파크 설치하기
+를 보고 설치하면 된다. 윈도우의 경우 주의할 점은 환경변수 설정! 참고로 환경변수 경로를 변경할 때, 컴퓨터를 다시 시작해야 적용된다 ㅠㅠ 이것 때문에 하루종일 고생했다…
+ 1) Rstudio에서 sparklyr 실행하기 sparklyr이라는 이름에서 눈치챘을 수도 있겠지만, 이 패키지는 Spark에서 dplyr을 사용할 수 있게 하는 패키지입니다.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Bayesian Method with TensorFlow Chapter 2. More on TensorFlow and TensorFlow Probability - 4. 거짓말에 대한 알고리즘 - Oh Data Science</title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<meta name="description" content="">
+		<meta property="og:title" content="Bayesian Method with TensorFlow Chapter 2. More on TensorFlow and TensorFlow Probability - 4. 거짓말에 대한 알고리즘" />
+<meta property="og:description" content="Bayesian Method with TensorFlow - Chapter2 More on TensorFlow and TensorFlow Probability #@title Imports and Global Variables (make sure to run this cell) { display-mode: &#34;form&#34; } try: # %tensorflow_version only exists in Colab. %tensorflow_version 2.x except Exception: pass from __future__ import absolute_import, division, print_function #@markdown This sets the warning status (default is `ignore`, since this notebook runs correctly) warning_status = &#34;ignore&#34; #@param [&#34;ignore&#34;, &#34;always&#34;, &#34;module&#34;, &#34;once&#34;, &#34;default&#34;, &#34;error&#34;] import warnings warnings." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/deceit/" />
+<meta property="article:published_time" content="2020-09-04T16:28:21+09:00" />
+<meta property="article:modified_time" content="2020-09-04T16:28:21+09:00" />
+
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+
+	<link rel="stylesheet" href="/css/style.css">
+	
+
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container header__container">
+		
+	<div class="logo">
+		<a class="logo__link" href="/" title="Oh Data Science" rel="home">
+			<div class="logo__item logo__text">
+					<div class="logo__title">Oh Data Science</div>
+					
+				</div>
+		</a>
+	</div>
+		<div class="divider"></div>
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Bayesian Method with TensorFlow Chapter 2. More on TensorFlow and TensorFlow Probability - 4. 거짓말에 대한 알고리즘</h1>
+			
+		</header><div class="content post__content clearfix">
+			<h1 id="bayesian-method-with-tensorflow---chapter2-more-on-tensorflow-and-tensorflow-probability"><strong>Bayesian Method with TensorFlow - Chapter2 More on TensorFlow and TensorFlow Probability</strong></h1>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#@title Imports and Global Variables (make sure to run this cell)  { display-mode: &#34;form&#34; }</span>
+
+<span style="color:#66d9ef">try</span>:
+  <span style="color:#75715e"># %tensorflow_version only exists in Colab.</span>
+  <span style="color:#f92672">%</span>tensorflow_version <span style="color:#ae81ff">2.</span>x
+<span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span>:
+  <span style="color:#66d9ef">pass</span>
+
+
+<span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> absolute_import, division, print_function
+
+
+<span style="color:#75715e">#@markdown This sets the warning status (default is `ignore`, since this notebook runs correctly)</span>
+warning_status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ignore&#34;</span> <span style="color:#75715e">#@param [&#34;ignore&#34;, &#34;always&#34;, &#34;module&#34;, &#34;once&#34;, &#34;default&#34;, &#34;error&#34;]</span>
+<span style="color:#f92672">import</span> warnings
+warnings<span style="color:#f92672">.</span>filterwarnings(warning_status)
+<span style="color:#66d9ef">with</span> warnings<span style="color:#f92672">.</span>catch_warnings():
+    warnings<span style="color:#f92672">.</span>filterwarnings(warning_status, category<span style="color:#f92672">=</span><span style="color:#a6e22e">DeprecationWarning</span>)
+    warnings<span style="color:#f92672">.</span>filterwarnings(warning_status, category<span style="color:#f92672">=</span><span style="color:#a6e22e">UserWarning</span>)
+
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+<span style="color:#f92672">import</span> os
+<span style="color:#75715e">#@markdown This sets the styles of the plotting (default is styled like plots from [FiveThirtyeight.com](https://fivethirtyeight.com/)</span>
+matplotlib_style <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;fivethirtyeight&#39;</span> <span style="color:#75715e">#@param [&#39;fivethirtyeight&#39;, &#39;bmh&#39;, &#39;ggplot&#39;, &#39;seaborn&#39;, &#39;default&#39;, &#39;Solarize_Light2&#39;, &#39;classic&#39;, &#39;dark_background&#39;, &#39;seaborn-colorblind&#39;, &#39;seaborn-notebook&#39;]</span>
+<span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#f92672">as</span> plt; plt<span style="color:#f92672">.</span>style<span style="color:#f92672">.</span>use(matplotlib_style)
+<span style="color:#f92672">import</span> matplotlib.axes <span style="color:#f92672">as</span> axes;
+<span style="color:#f92672">from</span> matplotlib.patches <span style="color:#f92672">import</span> Ellipse
+<span style="color:#f92672">import</span> matplotlib <span style="color:#f92672">as</span> mpl
+<span style="color:#75715e">#%matplotlib inline</span>
+<span style="color:#f92672">import</span> seaborn <span style="color:#f92672">as</span> sns; sns<span style="color:#f92672">.</span>set_context(<span style="color:#e6db74">&#39;notebook&#39;</span>)
+<span style="color:#f92672">from</span> IPython.core.pylabtools <span style="color:#f92672">import</span> figsize
+<span style="color:#75715e">#@markdown This sets the resolution of the plot outputs (`retina` is the highest resolution)</span>
+notebook_screen_res <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;retina&#39;</span> <span style="color:#75715e">#@param [&#39;retina&#39;, &#39;png&#39;, &#39;jpeg&#39;, &#39;svg&#39;, &#39;pdf&#39;]</span>
+<span style="color:#75715e">#%config InlineBackend.figure_format = notebook_screen_res</span>
+
+<span style="color:#f92672">import</span> tensorflow <span style="color:#f92672">as</span> tf
+
+<span style="color:#f92672">import</span> tensorflow_probability <span style="color:#f92672">as</span> tfp
+tfd <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>distributions
+tfb <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>bijectors
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">_TFColor</span>(object):
+    <span style="color:#e6db74">&#34;&#34;&#34;Enum of colors used in TF docs.&#34;&#34;&#34;</span>
+    red <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#F15854&#39;</span>
+    blue <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#5DA5DA&#39;</span>
+    orange <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#FAA43A&#39;</span>
+    green <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#60BD68&#39;</span>
+    pink <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#F17CB0&#39;</span>
+    brown <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#B2912F&#39;</span>
+    purple <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#B276B2&#39;</span>
+    yellow <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#DECF3F&#39;</span>
+    gray <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;#4D4D4D&#39;</span>
+    <span style="color:#66d9ef">def</span> __getitem__(self, i):
+        <span style="color:#66d9ef">return</span> [
+            self<span style="color:#f92672">.</span>red,
+            self<span style="color:#f92672">.</span>orange,
+            self<span style="color:#f92672">.</span>green,
+            self<span style="color:#f92672">.</span>blue,
+            self<span style="color:#f92672">.</span>pink,
+            self<span style="color:#f92672">.</span>brown,
+            self<span style="color:#f92672">.</span>purple,
+            self<span style="color:#f92672">.</span>yellow,
+            self<span style="color:#f92672">.</span>gray,
+        ][i <span style="color:#f92672">%</span> <span style="color:#ae81ff">9</span>]
+TFColor <span style="color:#f92672">=</span> _TFColor()
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">session_options</span>(enable_gpu_ram_resizing<span style="color:#f92672">=</span>True, enable_xla<span style="color:#f92672">=</span>False):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    Allowing the notebook to make use of GPUs if they&#39;re available.
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    XLA (Accelerated Linear Algebra) is a domain-specific compiler for linear
+</span><span style="color:#e6db74">    algebra that optimizes TensorFlow computations.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    config <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>config
+    gpu_devices <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span>experimental<span style="color:#f92672">.</span>list_physical_devices(<span style="color:#e6db74">&#39;GPU&#39;</span>)
+    <span style="color:#66d9ef">if</span> enable_gpu_ram_resizing:
+        <span style="color:#66d9ef">for</span> device <span style="color:#f92672">in</span> gpu_devices:
+           tf<span style="color:#f92672">.</span>config<span style="color:#f92672">.</span>experimental<span style="color:#f92672">.</span>set_memory_growth(device, True)
+    <span style="color:#66d9ef">if</span> enable_xla:
+        config<span style="color:#f92672">.</span>optimizer<span style="color:#f92672">.</span>set_jit(True)
+    <span style="color:#66d9ef">return</span> config
+
+session_options(enable_gpu_ram_resizing<span style="color:#f92672">=</span>True, enable_xla<span style="color:#f92672">=</span>True)
+
+<span style="color:#960050;background-color:#1e0010">!</span>apt <span style="color:#f92672">-</span>qq <span style="color:#f92672">-</span>y install fonts<span style="color:#f92672">-</span>nanum
+ 
+<span style="color:#f92672">import</span> matplotlib.font_manager <span style="color:#f92672">as</span> fm
+fontpath <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf&#39;</span>
+font <span style="color:#f92672">=</span> fm<span style="color:#f92672">.</span>FontProperties(fname<span style="color:#f92672">=</span>fontpath, size<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>)
+plt<span style="color:#f92672">.</span>rc(<span style="color:#e6db74">&#39;font&#39;</span>, family<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;NanumBarunGothic&#39;</span>) 
+mpl<span style="color:#f92672">.</span>font_manager<span style="color:#f92672">.</span>_rebuild()
+</code></pre></div><pre><code>fonts-nanum is already the newest version (20170925-1).
+The following package was automatically installed and is no longer required:
+  libnvidia-common-440
+Use 'apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 39 not upgraded.
+</code></pre>
+<h1 id="4-거짓말에-대한-알고리즘">4. <strong>거짓말에 대한 알고리즘</strong></h1>
+<p>소셜 데이터에는 연구를 더욱 어렵게 하는 문제가 있으니, 바로 사람들이 항상 정직한 대답을 하진 않는단겁니다. 예를 들어 &ldquo;당신은 시험볼 때 한 번이라도 치팅을 한 적 있습니까?&rdquo; 라는 질문에 거짓말을 한 비율이 반드시 있을거란걸 확신할 수 있죠. 확실하다고 말할 수 있는건 실제로 치팅을 하지 않은 비율은 관찰된 값보다 더 낮을거란 것 뿐입니다.(치팅 했는데 안했다고 거짓말한 비율만 따져보겠습니다. 치팅 안했는데 했다고 거짓말하는 사람은 없겠죠?)</p>
+<p>이런 거짓말 문제를 베이지안 모델링을 통해서 우아하게 해결하기 위해서는 첫 번째로 이항 분포(binomial distribution)을 소개할 필요가 있습니다.</p>
+<h2 id="이항-분포"><strong>이항 분포</strong></h2>
+<p>이항분포는 간단하고 유용하기 때문에 가장 유명한 분포 중 하나입니다. 그런데 지금까지 봐왔던 다른 분포와는 달리, 이항분포는 두 개의 모수를 가지고 있습니다. 실행 횟수나 잠재적인 사건들의 갯수를 나타내는 양의 정수인 $N$, 그리고 한 번의 시도에서 사건이 발행할 확률인 $p$이죠. 이항분포는 포아송 분포와 같이 이산 분포입니다. 그러나 모든 양의 정수에 확률을 부여하는 포아송 분포와는 달리 이항 분포는 0과 $N$ 사이에만 확률을 부여하죠. 이항 분포의 pmf는 다음과 같습니다.</p>
+<p>$$P( X = k ) =  {{N}\choose{k}}  p^k(1-p)^{N-k}$$</p>
+<p>$X$가 모수 $p$와 $N$을 가지는 이항 확률 변수라고 했을 때, 그것을 $X \sim Bin(N,p)$라고 쓸 수 있고 이것은 $N$번의 시도에서 $X$번 사건이 발행했다는 뜻입니다.(그래서 $X$가 0부터 $N$사이가 되는겁니다.) 더 큰 $p$값은(물론 0부터 1 사이입니다) 사건이 발생할 확률이 더 높다는 것을 의미합니다. 이항 확률 변수의 기댓값은 $N * p$와 같습니다. 자 이제 임의의 모수를 넣고 이항분포의 그래프를 그려봅시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># evaluate 함수 생성</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">evaluate</span>(tensors):
+    <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>executing_eagerly():
+         <span style="color:#66d9ef">return</span> tf<span style="color:#f92672">.</span>nest<span style="color:#f92672">.</span>pack_sequence_as(
+             tensors,
+             [t<span style="color:#f92672">.</span>numpy() <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>is_tensor(t) <span style="color:#66d9ef">else</span> t
+             <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> tf<span style="color:#f92672">.</span>nest<span style="color:#f92672">.</span>flatten(tensors)])
+    <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>Session() <span style="color:#66d9ef">as</span> sess:
+        <span style="color:#66d9ef">return</span> sess<span style="color:#f92672">.</span>run(tensors)
+
+N <span style="color:#f92672">=</span> <span style="color:#ae81ff">10.</span>
+k_values <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>range(start<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, limit<span style="color:#f92672">=</span>(N <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>), dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32) <span style="color:#75715e"># X는 0부터 N까지</span>
+rv_probs_1 <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Binomial(total_count<span style="color:#f92672">=</span>N, probs<span style="color:#f92672">=.</span><span style="color:#ae81ff">4</span>)<span style="color:#f92672">.</span>prob(k_values) 
+rv_probs_2 <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Binomial(total_count<span style="color:#f92672">=</span>N, probs<span style="color:#f92672">=.</span><span style="color:#ae81ff">9</span>)<span style="color:#f92672">.</span>prob(k_values)
+<span style="color:#75715e"># p = 0.4, 0.9인 이산분포를 정의하고 0부터 N까지에 확률을 부여</span>
+
+<span style="color:#75715e"># 그래프 실행하기</span>
+[
+    k_values_,
+    rv_probs_1_,
+    rv_probs_2_,
+] <span style="color:#f92672">=</span> evaluate([
+    k_values,
+    rv_probs_1,
+    rv_probs_2,
+])
+
+<span style="color:#75715e"># 시각화</span>
+plt<span style="color:#f92672">.</span>figure(figsize<span style="color:#f92672">=</span>(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">4</span>))
+colors <span style="color:#f92672">=</span> [TFColor[<span style="color:#ae81ff">3</span>], TFColor[<span style="color:#ae81ff">0</span>]] 
+
+plt<span style="color:#f92672">.</span>bar(k_values_ <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span>, rv_probs_1_, color<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">0</span>],
+        edgecolor<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">0</span>],
+        alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.6</span>,
+        label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;$N$: </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">, $p$: </span><span style="color:#e6db74">%.1f</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> (<span style="color:#ae81ff">10.</span>, <span style="color:#f92672">.</span><span style="color:#ae81ff">4</span>),
+        linewidth<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+plt<span style="color:#f92672">.</span>bar(k_values_ <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span>, rv_probs_2_, color<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">1</span>],
+        edgecolor<span style="color:#f92672">=</span>colors[<span style="color:#ae81ff">1</span>],
+        alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.6</span>,
+        label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;$N$: </span><span style="color:#e6db74">%d</span><span style="color:#e6db74">, $p$: </span><span style="color:#e6db74">%.1f</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">%</span> (<span style="color:#ae81ff">10.</span>, <span style="color:#f92672">.</span><span style="color:#ae81ff">9</span>),
+        linewidth<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+
+plt<span style="color:#f92672">.</span>legend(loc<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;upper left&#34;</span>)
+plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">10.5</span>)
+plt<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#34;$k$&#34;</span>)
+plt<span style="color:#f92672">.</span>ylabel(<span style="color:#e6db74">&#34;$P(X = k)$&#34;</span>)
+plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;이산 확률 변수의 확률 질량 함수(pmf)&#34;</span>);
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92211839-0736ea80-eecc-11ea-9304-a11da2a03730.png" alt="output_7_0"></p>
+<p>$N = 1$일 때의 특별한 경우를 베르누이 분포라고 합니다. 베르누이와 이항 확률 변수 사이에는 특별한 관계가 있는데요, 만일 우리가 $X_1, X_2, &hellip;, X_N$의 베르누이 확률 변수를 가지고 있고 같은 $p$가 모수라면 $Z = X_1 + X_2 + &hellip; + X_N$은 $Binomial(N,p)$와 같습니다.</p>
+<p>베르누이 확률 변수의 기댓값은 $p$입니다. 이것은 더 일반적인 형태인 이항 확률 변수의 기댓값인 $N * p$에서 $N = 1$일 때와 같죠.</p>
+<h3 id="예제--학생들의-치팅"><strong>예제 : 학생들의 치팅</strong></h3>
+<p>우리는 시험 도중 치팅을 하는 학생들의 빈도를 결정하기 위해 이항 분포를 쓸 것입니다. $N$이 시험을 보는 학생 수라고 하고 각각의 학생이 시험 후에 면담을 가진다고 합시다(시험의 결과는 알지 못하고 대답합니다.). 우리는 $X$개의 &ldquo;네 제가 치팅을 했어요&rdquo; 라는 답변을 받을 것입니다. 이제 우리는 $N$, $p$에 대한 사전 믿음 그리고 관찰된 데이터 $X$로 $p$의 사후 분포를 구할 수 있죠.</p>
+<p>이것은 완벽하게 불합리한 모델입니다. 어떠한 학생도 아무런 처벌이 없다고 해도 자기가 치팅을 했다고 인정하지 않겠죠. 자 이제 필요한 것은 학생들이 치팅을 했는지 묻는 더 나은 알고리즘입니다. 이상적인 알고리즘은 보안을 지켜줌으로써 학생들에게 솔직한 답변을 하도록 유도하는거죠. 다음의 알고리즘은 제가 강력하게 추천하는 독창적이고 효과적인 해결방법입니다.</p>
+<blockquote>
+<p>각 학생의 면담 과정에서 학생들은 인터뷰어가 안보이게 동전을 던집니다. 앞면이 나온다면 학생들은 정직하게 말하고 뒷면이 나온다면 다시 동전을 던져서 앞면이 나오면 &ldquo;네 제가 치팅을 했습니다&quot;라고 답하고 뒷면이 나오면 &ldquo;아니요 전 치팅하지 않았습니다&quot;라고 답합니다. 이 방법으로 인터뷰어는 &ldquo;네 제가 치팅했어요&quot;라는 답변이 실제 치팅을 해서 말한건지, 두 번째 동전 던지기에서 앞면이 나와서 말한건지 모르게 됩니다. 따라서 보안이 지켜지고 정직한 답변을 얻을 수 있게되죠.</p>
+</blockquote>
+<p>저는 이것을 보안 알고리즘이라고 하겠습니다. 물론 인터뷰어가 치팅을 했다고 진실을 고백하는 답변이 아닌 무작위한 동전 던지기에 의해 치팅을 했다고 답변을 받기 때문에 여전히 잘못된 데이터를 받고 있다고 주장할 수도 있습니다. 하지만 다른 관점에서 보면 우리들은 대략 절반의 데이터를 그들이 노이즈일 것이기 때문에 버리게 됩니다. 그러나 우리는 모델링될 수 있는 체계적인 데이터를 얻게 되죠. 나아가서 아마 다소 순진한 생각일 수도 있지만, 거짓으로 답하는 확률을 고려하지 않아도 되게 됩니다. 이제 우리는 TFP를 사용해서 이 난잡한 데이터를 파고 들어가서 실제 거짓말쟁이들의 비율의 사후 분포를 알아낼 수 있습니다.</p>
+<p>100명의 학생이 설문에 참여하고 치팅한 학생의 비율인 $p$를 찾는 것이 목적이라고 합시다. 이것을 TFP에서 모델링할 수 있는 방법은 몇 가지가 있는데, 여기서는 가장 명시적인 방법을 쓰도록 하겠고 이후에 간단한 버전을 소개하도록 하겠습니다. 두 버전은 모두 같은 추론에서 시작합니다. 우리의 생성 모델로 사전 믿음에서 실제 치터들의 비율인 $p$를 추출하도록 하겠습니다. $p$가 무엇인지에 대해서 잘 모르기 때문에 $Uniform(0,1)$을 사전 분포로 정하겠습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">N <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+rv_p <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;freq_cheating&#34;</span>, low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)
+</code></pre></div><p>자 이제 100명의 학생들에게 베르누이 확률변수를 부여하도록 합시다. 1은 치터를 의미하고 0은 그렇지 않음을 뜻하죠</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Uniform(0,1)에서 샘플링한 rv_p를 모수로 하는 베르누이 분포를 만듭니다(이것은 실제 p의 분포를 뜻합니다)</span>
+true_answers <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;truths&#34;</span>, 
+                             probs<span style="color:#f92672">=</span>rv_p<span style="color:#f92672">.</span>sample())<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>N, 
+                                                      seed<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>)
+<span style="color:#75715e"># 그래프를 실행합시다</span>
+[
+    true_answers_,
+] <span style="color:#f92672">=</span> evaluate([
+    true_answers,
+])
+
+<span style="color:#66d9ef">print</span>(true_answers_)
+<span style="color:#66d9ef">print</span>(true_answers_<span style="color:#f92672">.</span>sum())
+</code></pre></div><pre><code>[1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 0 1 1
+ 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 0 1 1 1 1 1 1 0 1
+ 0 1 1 1 0 1 1 1 0 1 1 1 1 1 1 1 1 1 0 1 1 0 1 1 1 1]
+87
+</code></pre>
+<p>우리의 보안 알고리즘을 실행하는데 있어 다음 단계는 각각의 학생들이 첫 번째 동전던지기를 하는 것입니다. 이것은 다시 앞면이 1이고 뒷면이 0인 $p = \frac{1}{2}$인 베르누이 확률변수 100개를 뽑으면서 모델링 할 수 있죠.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">N <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+first_coin_flips <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;first_flips&#34;</span>, 
+                                 probs<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>N, 
+                                                   seed<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>)
+<span style="color:#75715e"># 그래프 실행</span>
+[
+    first_coin_flips_,
+] <span style="color:#f92672">=</span> evaluate([
+    first_coin_flips,
+])
+
+<span style="color:#66d9ef">print</span>(first_coin_flips_)
+</code></pre></div><pre><code>[1 1 0 1 1 1 0 0 0 1 1 1 0 0 0 0 1 1 0 0 0 0 1 1 0 1 1 1 1 1 1 1 0 0 1 1 0
+ 1 0 1 1 0 0 0 0 0 1 1 0 1 1 0 1 1 0 1 0 0 0 1 1 1 0 0 0 0 1 0 1 0 1 1 1 0
+ 1 1 0 1 0 0 1 0 0 0 0 0 0 0 1 1 0 0 1 0 0 1 1 0 0 0]
+</code></pre>
+<p>모든 학생이 다 두 번째 동전을 던지지 않지만, 두 번째 동전던지기에 대해서도 가능한 상황들을 모델링할 수 있습니다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">N <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+second_coin_flips <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;second_flips&#34;</span>, 
+                                  probs<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)<span style="color:#f92672">.</span>sample(sample_shape<span style="color:#f92672">=</span>N, 
+                                                    seed<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>)
+<span style="color:#75715e"># Execute graph</span>
+[
+    second_coin_flips_,
+] <span style="color:#f92672">=</span> evaluate([
+    second_coin_flips,
+])
+
+<span style="color:#66d9ef">print</span>(second_coin_flips_)
+</code></pre></div><pre><code>[1 1 1 0 1 1 0 0 1 0 0 1 0 0 0 1 0 0 0 0 1 1 1 0 1 0 0 0 1 0 0 0 1 0 0 1 0
+ 0 0 0 0 0 0 0 1 0 1 0 1 0 1 1 0 1 0 1 0 0 1 1 0 0 0 1 0 0 1 1 1 0 1 1 0 1
+ 0 0 0 0 1 1 1 0 1 1 0 1 1 1 0 0 0 1 1 0 0 1 1 1 1 1]
+</code></pre>
+<p>이 변수들을 사용해서 &ldquo;제가 치팅했어요&quot;라고 대답하는 비율을 만들 수 있습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">observed_proportion_calc</span>(t_a <span style="color:#f92672">=</span> true_answers, 
+                             fc <span style="color:#f92672">=</span> first_coin_flips,
+                             sc <span style="color:#f92672">=</span> second_coin_flips):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    정규화되지 않은 로그 사후 분포 함수
+</span><span style="color:#e6db74">        
+</span><span style="color:#e6db74">    Args:
+</span><span style="color:#e6db74">      t_a: 사실대로 대답하는 것을 나타내는 이항 변수 array
+</span><span style="color:#e6db74">      fc: 첫 번째 동전 던지기를 나타내는 이항 변수 array
+</span><span style="color:#e6db74">      sc: 두 번째 동전 던지기를 나타내는 이항 변수 array
+</span><span style="color:#e6db74">    Returns: 
+</span><span style="color:#e6db74">      동전 던지기의 관측 비율
+</span><span style="color:#e6db74">    Closure over: N
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    observed <span style="color:#f92672">=</span> fc <span style="color:#f92672">*</span> t_a <span style="color:#f92672">+</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> fc) <span style="color:#f92672">*</span> sc
+    observed_proportion <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>cast(tf<span style="color:#f92672">.</span>reduce_sum(observed), tf<span style="color:#f92672">.</span>float32) <span style="color:#f92672">/</span> tf<span style="color:#f92672">.</span>cast(N, tf<span style="color:#f92672">.</span>float32)
+    
+    <span style="color:#66d9ef">return</span> tf<span style="color:#f92672">.</span>cast(observed_proportion, tf<span style="color:#f92672">.</span>float32)
+</code></pre></div><p>코드의 15번째 라인 <code>fc*t_a + (1-fc)*sc</code>는 보안 알고리즘의 심장을 포함합니다. 이 array는 첫 번째로 첫 번째 동전이 앞면이었고 그 학생이 치터거나 두 번째로 첫 번째 동전이 뒷면이었고 두 번째 동전은 앞면인 경우에 1이 됩니다. 나머지는 0이 되구요. 마지막으로, 마지막인 18번째 라인에서 이 벡터들의 합을 구하고 <code>float(N)</code>으로 나누어 비율을 만듭니다. 자 이제 함수에 위에서 만든 NumPy array들을 넣고 값을 구해봅시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">observed_proportion_val <span style="color:#f92672">=</span> observed_proportion_calc(t_a<span style="color:#f92672">=</span>true_answers_,
+                                                   fc<span style="color:#f92672">=</span>first_coin_flips_,
+                                                   sc<span style="color:#f92672">=</span>second_coin_flips_)
+<span style="color:#75715e"># 그래프를 실행합니다</span>
+[
+    observed_proportion_val_,
+] <span style="color:#f92672">=</span> evaluate([
+    observed_proportion_val,
+])
+
+<span style="color:#66d9ef">print</span>(observed_proportion_val_)
+</code></pre></div><pre><code>0.66
+</code></pre>
+<p>다음으로 우리는 데이터셋이 필요합니다. 우리의 보안 알고리즘을 실제로 학생들에게 실행한 다음 받은 답변이 35개의 &ldquo;제가 치팅했어요&quot;라고 가정합시다. 이것을 상대적인 관점에서 보면, 만일 실제로 아무런 치터가 없다면 우리는 25%의 &ldquo;제가 치팅했어요&quot;가 있을거라고 예상학 수 있습니다(50%의 확률로 첫 번째 동전 뒷면 * 50%의 확률로 두 번째 코인 앞면 = 25%), 그래서 치팅이 없는 세상에서는 약 25명의 학생이 &ldquo;제가 치팅했어요&quot;라고 대답할겁니다. 반대로 모든 학생이 치팅을 했다면 대략 3/4 비율의 학생들이 &ldquo;제가 치팅했어요&rdquo; 라고 답할것입니다.</p>
+<p>관찰자들이 <code>N = 100</code>이고 <code>total_yes = 35</code>인 이항 확률 변수를 찾아냈다고 가정합시다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">total_count <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+total_yes <span style="color:#f92672">=</span> <span style="color:#ae81ff">35</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">coin_joint_log_prob</span>(total_yes, total_count, lies_prob):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    결합 로그 확률 최적화 함수
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    Args:
+</span><span style="color:#e6db74">      headsflips: 총 동전 앞면의 갯수(정수)
+</span><span style="color:#e6db74">      N: 총 동전 던진 횟수(정수)
+</span><span style="color:#e6db74">      lies_prob: 이항분포에서 한 번 동전을 던졌을 때 앞면이 나올 확률
+</span><span style="color:#e6db74">    Returns: 
+</span><span style="color:#e6db74">      Joint log probability optimization function.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+  
+    rv_lies_prob <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_lies_prob&#34;</span>,low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)
+
+    cheated <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(probs<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>cast(lies_prob, tf<span style="color:#f92672">.</span>float32))<span style="color:#f92672">.</span>sample(total_count)
+    first_flips <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(probs<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)<span style="color:#f92672">.</span>sample(total_count)
+    second_flips <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Bernoulli(probs<span style="color:#f92672">=</span><span style="color:#ae81ff">0.5</span>)<span style="color:#f92672">.</span>sample(total_count)
+    observed_probability <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>reduce_sum(tf<span style="color:#f92672">.</span>cast(
+        cheated <span style="color:#f92672">*</span> first_flips <span style="color:#f92672">+</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> first_flips) <span style="color:#f92672">*</span> second_flips, tf<span style="color:#f92672">.</span>float32)) <span style="color:#f92672">/</span> total_count
+
+    rv_yeses <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Binomial(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_yeses&#34;</span>,
+                total_count<span style="color:#f92672">=</span>float(total_count),
+                probs<span style="color:#f92672">=</span>observed_probability)
+    
+    <span style="color:#66d9ef">return</span> (
+        rv_lies_prob<span style="color:#f92672">.</span>log_prob(lies_prob)
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_yeses<span style="color:#f92672">.</span>log_prob(tf<span style="color:#f92672">.</span>cast(total_yes, tf<span style="color:#f92672">.</span>float32)))
+        )
+</code></pre></div><p>밑에서 우리는 모든 알고싶은 변수들을 Metropolis-Hastings 샘플러에 추가하고 모델링해서 우리의 블랙박스 알고리즘을 실행합니다. 여기서 주목할 점은 이전에 했던 Hamiltonian Monte Carlo(HMC)가 아니라 Metropolis-Hastings MCMC를 사용한다는 점입니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">burnin <span style="color:#f92672">=</span> <span style="color:#ae81ff">15000</span>
+num_of_steps <span style="color:#f92672">=</span> <span style="color:#ae81ff">40000</span>
+total_count<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>
+
+<span style="color:#75715e"># Set the chain&#39;s start state.</span>
+initial_chain_state <span style="color:#f92672">=</span> [
+    <span style="color:#ae81ff">0.4</span> <span style="color:#f92672">*</span> tf<span style="color:#f92672">.</span>ones([], dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;init_prob&#34;</span>)
+]
+
+<span style="color:#75715e"># Define a closure over our joint_log_prob.</span>
+unnormalized_posterior_log_prob <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> <span style="color:#f92672">*</span>args: coin_joint_log_prob(total_yes, total_count,  <span style="color:#f92672">*</span>args)
+
+<span style="color:#75715e"># Defining the Metropolis-Hastings</span>
+<span style="color:#75715e"># We use a Metropolis-Hastings method here instead of Hamiltonian method</span>
+<span style="color:#75715e"># because the coin flips in the above example are non-differentiable and cannot</span>
+<span style="color:#75715e"># be used with HMC.</span>
+metropolis<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>RandomWalkMetropolis(
+    target_log_prob_fn<span style="color:#f92672">=</span>unnormalized_posterior_log_prob,
+    seed<span style="color:#f92672">=</span><span style="color:#ae81ff">54</span>)
+
+<span style="color:#75715e"># Sample from the chain.</span>
+[
+    posterior_p
+], kernel_results <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>sample_chain(
+    num_results<span style="color:#f92672">=</span>num_of_steps,
+    num_burnin_steps<span style="color:#f92672">=</span>burnin,
+    current_state<span style="color:#f92672">=</span>initial_chain_state,
+    kernel<span style="color:#f92672">=</span>metropolis,
+    parallel_iterations<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>,
+    name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Metropolis-Hastings_coin-flips&#39;</span>)
+</code></pre></div><h3 id="사후-분포에서-샘플링하기-위해-tf그래프를-실행합니다"><strong>사후 분포에서 샘플링하기 위해 TF그래프를 실행합니다</strong></h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 주의 : 그래프 모드에서는 이걸 실행하는데 5분 이상 걸릴 수 있습니다</span>
+[
+    posterior_p_,
+    kernel_results_
+] <span style="color:#f92672">=</span> evaluate([
+    posterior_p,
+    kernel_results,
+])
+ 
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;acceptance rate: {}&#34;</span><span style="color:#f92672">.</span>format(
+    kernel_results_<span style="color:#f92672">.</span>is_accepted<span style="color:#f92672">.</span>mean()))
+<span style="color:#75715e"># print(&#34;prob_p trace: &#34;, posterior_p_)</span>
+<span style="color:#75715e"># print(&#34;prob_p burned trace: &#34;, posterior_p_[burnin:])</span>
+burned_cheating_freq_samples_ <span style="color:#f92672">=</span> posterior_p_[burnin:]
+</code></pre></div><pre><code>acceptance rate: 0.11125
+</code></pre>
+<p>마지막으로 결과를 그래프로 그립시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">6</span>))
+p_trace_ <span style="color:#f92672">=</span> burned_cheating_freq_samples_
+plt<span style="color:#f92672">.</span>hist(p_trace_, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stepfilled&#34;</span>, density<span style="color:#f92672">=</span>True, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.85</span>, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>, 
+         label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;사후 분포&#34;</span>, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">3</span>])
+plt<span style="color:#f92672">.</span>vlines([<span style="color:#f92672">.</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">.</span><span style="color:#ae81ff">40</span>], [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>], [<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">5</span>], alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.3</span>)
+plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>)
+plt<span style="color:#f92672">.</span>legend();
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92211841-0900ae00-eecc-11ea-9c47-7976fd314675.png" alt="output_33_0"></p>
+<p>위의 그래프를 봤을 때 우리는 여전히 치터들의 비율이 몇이나 될지 확실하지 않습니다. 그러나 우리는 0.1에서 0.4 사이로 그 범위를 좁힐 수 있습니다. 이 결과는 우리가 사전에 아무것도 모른다고 가정하고 만들었기 때문에(그래서 사전분포를 Uniform으로 가정했죠) 꽤 괜찮은 결과입니다. 그러나 실제 값이 있을 것이라고 예측되는 값의 범위가 0.3이기 때문에 그렇게 좋지 않은 결과이기도 합니다. 우리는 무언가를 얻어낸 것일까요 아니면 여전히 실제 빈도에 대해 너무나 불확실한걸까요?</p>
+<p>저는 우리가 무언가를 발견했다고 생각합니다. 우리의 사후 분포에 따르면 $p = 0$에 상당히 낮은 확률을 부여했기 때문에 치터가 아예 없다고 볼 수 없다는 것은 쓸만한 결과입니다. 우리가 Uniform 사전 분포에서 시작했기 때문에, 시작점에서는 모든 $p$가 같은 가능성을 가지고 있었습니다. 그러나 데이터가 $p=0$일 확률을 배제했죠. 그렇기 떄문에 학생들 중 치터가 있다고 확실할 수 있게 됩니다.</p>
+<p>이 종류의 알고리즘은 사용자들에게 개인정보를 얻는데 활용할 수 있습니다. 그리고 그 데이터가 노이즈가 있긴 하지만 믿을만 하다고 자신감을 가지세요</p>
+<h2 id="다른-tfp-모델"><strong>다른 TFP 모델</strong></h2>
+<p>$p$값이 주어졌을 때(우리가 전지적인 시점에서 봤을 때 보여지는), 우리는 학생이 치팅을 했다고 대답할 확률을 알아낼 수 있습니다.</p>
+<p>$$
+\begin{align}
+P(\text{&ldquo;Yes&rdquo;}) = P( \text{Heads on first coin} )P( \text{cheater} ) + P( \text{Tails on first coin} )P( \text{Heads on second coin} )
+\end{align}
+$$</p>
+<p>$$
+\begin{align}
+&amp;= \frac{1}{2}p + \frac{1}{2}\frac{1}{2}\<br>
+&amp;= \frac{p}{2} + \frac{1}{4}
+\end{align}
+$$</p>
+<p>따라서 $p$를 아는 것은 우리가 학생이 치팅을 했다고 대답할 확률을 아는 것과 같습니다.</p>
+<p>만일 당신이 치팅을 했다고 말할 비율 <code>p_skewed</code>를 알고, 우리가 $N=100$ 학생들을 면담했으며 치팅을 했다고 대답하는 수가 <code>N</code>과 <code>p_skwed</code>를 모수로 하는 이항 확률 변수라고 가정합시다.</p>
+<p>이것에 우리의 관찰된 100명 중에 35명이 치팅을 했다고 대답한 것을 포함하고 그것을 밑에 있는 우리의 <code>joint_log_prob</code>의 클로저를 정의하는 밑의 <code>alt_joint_prob</code>에 넣습니다.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">N <span style="color:#f92672">=</span> <span style="color:#ae81ff">100.</span>
+total_yes <span style="color:#f92672">=</span> <span style="color:#ae81ff">35.</span>
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">alt_joint_log_prob</span>(yes_responses, N, prob_cheating):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    다른 결합 로그 확률 최적화 함수
+</span><span style="color:#e6db74">        
+</span><span style="color:#e6db74">    Args:
+</span><span style="color:#e6db74">      yes_responses: 치팅을 했다고 말한 횟수(정수)
+</span><span style="color:#e6db74">      N: 총 관찰값(정수)
+</span><span style="color:#e6db74">      prob_cheating: 실제 치팅을 한 학생의 실험 비율
+</span><span style="color:#e6db74">    Returns: 
+</span><span style="color:#e6db74">      결합 로그 확률 최적화 함수
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    tfd <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>distributions
+  
+    rv_prob <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Uniform(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_prob&#34;</span>, low<span style="color:#f92672">=</span><span style="color:#ae81ff">0.</span>, high<span style="color:#f92672">=</span><span style="color:#ae81ff">1.</span>)
+    p_skewed <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.5</span> <span style="color:#f92672">*</span> prob_cheating <span style="color:#f92672">+</span> <span style="color:#ae81ff">0.25</span>
+    rv_yes_responses <span style="color:#f92672">=</span> tfd<span style="color:#f92672">.</span>Binomial(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rv_yes_responses&#34;</span>,
+                                     total_count<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>cast(N, tf<span style="color:#f92672">.</span>float32), 
+                                     probs<span style="color:#f92672">=</span>p_skewed)
+
+    <span style="color:#66d9ef">return</span> (
+        rv_prob<span style="color:#f92672">.</span>log_prob(prob_cheating)
+        <span style="color:#f92672">+</span> tf<span style="color:#f92672">.</span>reduce_sum(rv_yes_responses<span style="color:#f92672">.</span>log_prob(tf<span style="color:#f92672">.</span>cast(yes_responses, tf<span style="color:#f92672">.</span>float32))))
+</code></pre></div><p>밑에서 모든 관심있는 변수들을 우리의 HMC를 만드는 셀에 넣고 모델링하여 우리의 블랙박스 알고리즘을 실행합시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">number_of_steps <span style="color:#f92672">=</span> <span style="color:#ae81ff">25000</span>
+burnin <span style="color:#f92672">=</span> <span style="color:#ae81ff">2500</span>
+
+<span style="color:#75715e"># 체인의 시작점을 설정합니다</span>
+initial_chain_state <span style="color:#f92672">=</span> [
+    <span style="color:#ae81ff">0.2</span> <span style="color:#f92672">*</span> tf<span style="color:#f92672">.</span>ones([], dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>float32, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;init_skewed_p&#34;</span>)
+]
+
+<span style="color:#75715e"># HMC는 과도하게 공간에 대한 제약을 하지 않기 때문에 표본들이 실제 가능한 값이 </span>
+<span style="color:#75715e"># 나오도록 변환할 필요가 있습니다</span>
+unconstraining_bijectors <span style="color:#f92672">=</span> [
+    tfp<span style="color:#f92672">.</span>bijectors<span style="color:#f92672">.</span>Sigmoid(),   <span style="color:#75715e"># 0부터 1 사이의 실수가 나오게 합시다</span>
+]
+
+<span style="color:#75715e"># 우리의 joint_log_prob의 클로저를 설정합니다</span>
+<span style="color:#75715e"># unnormalized_posterior_log_prob = lambda *args: alt_joint_log_prob(headsflips, total_yes, N, *args)</span>
+unnormalized_posterior_log_prob <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> <span style="color:#f92672">*</span>args: alt_joint_log_prob(total_yes, N, <span style="color:#f92672">*</span>args)
+
+<span style="color:#75715e"># 최초 step_size를 설정합니다</span>
+step_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.5</span>
+
+<span style="color:#75715e"># HMC를 정의합니다</span>
+hmc<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>TransformedTransitionKernel(
+    inner_kernel<span style="color:#f92672">=</span>tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>HamiltonianMonteCarlo(
+        target_log_prob_fn<span style="color:#f92672">=</span>unnormalized_posterior_log_prob,
+        num_leapfrog_steps<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>,
+        step_size<span style="color:#f92672">=</span>step_size,
+        state_gradients_are_stopped<span style="color:#f92672">=</span>True),
+    bijector<span style="color:#f92672">=</span>unconstraining_bijectors)
+hmc <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>SimpleStepSizeAdaptation(inner_kernel<span style="color:#f92672">=</span>hmc, num_adaptation_steps<span style="color:#f92672">=</span>int(burnin <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.8</span>))
+<span style="color:#75715e"># 체인에서 표본을 뽑습니다</span>
+[
+    posterior_skewed_p
+], kernel_results <span style="color:#f92672">=</span> tfp<span style="color:#f92672">.</span>mcmc<span style="color:#f92672">.</span>sample_chain(
+    num_results<span style="color:#f92672">=</span>number_of_steps,
+    num_burnin_steps<span style="color:#f92672">=</span>burnin,
+    current_state<span style="color:#f92672">=</span>initial_chain_state,
+    kernel<span style="color:#f92672">=</span>hmc)
+</code></pre></div><h3 id="구한-사후-분포에서-샘플링-하기-위해-그래프를-실행합시다"><strong>구한 사후 분포에서 샘플링 하기 위해 그래프를 실행합시다</strong></h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># 그래프 모드에서 이 셀은 5분 이상 소요될 수 있습니다</span>
+[
+    posterior_skewed_p_,
+    kernel_results_
+] <span style="color:#f92672">=</span> evaluate([
+    posterior_skewed_p,
+    kernel_results
+])
+
+    
+<span style="color:#75715e"># print(&#34;final step size: {}&#34;.format(</span>
+<span style="color:#75715e">#     kernel_results_.inner_results.extra.step_size_assign[-100:].mean()))</span>
+
+<span style="color:#75715e"># print(&#34;p_skewed trace: &#34;, posterior_skewed_p_)</span>
+<span style="color:#75715e"># print(&#34;p_skewed burned trace: &#34;, posterior_skewed_p_[burnin:])</span>
+freq_cheating_samples_ <span style="color:#f92672">=</span> posterior_skewed_p_[burnin:]
+
+</code></pre></div><p>이제 우리의 결과로 그래프를 그립시다</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#f92672">.</span>figure(figsize(<span style="color:#ae81ff">12.5</span>, <span style="color:#ae81ff">6</span>))
+p_trace_ <span style="color:#f92672">=</span> freq_cheating_samples_
+plt<span style="color:#f92672">.</span>hist(p_trace_, histtype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stepfilled&#34;</span>, density<span style="color:#f92672">=</span>True, alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.85</span>, bins<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>, 
+         label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;사후 분포&#34;</span>, color<span style="color:#f92672">=</span>TFColor[<span style="color:#ae81ff">3</span>])
+plt<span style="color:#f92672">.</span>vlines([<span style="color:#f92672">.</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">.</span><span style="color:#ae81ff">40</span>], [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>], [<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">5</span>], alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.2</span>)
+plt<span style="color:#f92672">.</span>xlim(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>)
+plt<span style="color:#f92672">.</span>legend();
+</code></pre></div><p><img src="https://user-images.githubusercontent.com/57588650/92211846-0a31db00-eecc-11ea-848d-66374b30894c.png" alt="output_43_0"></p>
+<p>자 이제 다음 포스트에서는 TFP와 TFP 모델링의 실용적인 예제들을 살펴보도록 하겠습니다.</p>
+
+		</div>
+		<footer class="post__footer">
+			
+<div class="post__tags tags clearfix">
+	<svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/bayesian/" rel="tag">Bayesian</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/tensorflow/" rel="tag">TensorFlow</a>
+		</li>
+		<li class="tags__item">
+			<a class="tags__link btn" href="/tags/python/" rel="tag">Python</a>
+		</li>
+	</ul>
+</div>
+		</footer>
+	</article>
+</main>
+
+<div class="authorbox clearfix">
+	<div class="authorbox__header">
+		<span class="authorbox__name">About Tai Hwan Oh</span>
+	</div>
+</div>
+
+
+
+			</div>
+			
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2021 Tai Hwan Oh.
+			<span class="footer__copyright-credits">Generated with <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> and <a href="https://github.com/Vimux/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a> theme.</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+</body>
+</html>
