@@ -15,3 +15,10 @@
 
 
 
+[submodule "public"]
+	path = public
+	url = https://github.com/dhxoghks95/dhxoghks95.github.io.git
+	branch = main
+[submodule "themes/Mainroad"]
+	path = themes/Mainroad
+	url = https://github.com/Vimux/Mainroad.git
