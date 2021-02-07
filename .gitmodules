@@ -1,10 +1,13 @@
 [submodule "dhxoghks95.github.io"]
 	path = dhxoghks95.github.io
 	url = https://github.com/dhxoghks95/dhxoghks95.github.io.git
-	branch = master
+	branch = main
 [submodule "Mainroad"]
 	path = Mainroad
 	url = https://github.com/dhxoghks95/Mainroad.git
 [submodule "themes/Mainroad"]
 	path = themes/Mainroad
 	url = https://github.com/dhxoghks95/Mainroad.git
+[submodule "mainroad"]
+	path = mainroad
+	url = https://github.com/vimux/mainroad
