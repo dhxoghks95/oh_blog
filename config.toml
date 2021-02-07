@@ -22,7 +22,7 @@ mathjax = true
 home = "left"
 list = "right"
 
-widgets = ["search", "recent", "categories", "taglist", "social"]
+widgets = ["recent", "categories", "taglist", "social"]
 
 [Params.widgets]
 recend_num = 5
