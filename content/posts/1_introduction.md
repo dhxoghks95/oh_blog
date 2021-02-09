@@ -1,3 +1,12 @@
+---
+title: A First Cource in Bayesian Statistical Methods Chapter 1. Introduction
+author : 오태환
+date: 2021-02-09T19:59:51+09:00
+categories : ["A First Course In Bayesian Statistical Methods"]
+tags : ["Bayesian", "Python"]
+
+---
+
 # A First Course in Bayesian Statistical Methods
 
 ## 1. 왜 베이지안을 배워야 하는가?
