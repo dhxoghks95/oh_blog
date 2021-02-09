@@ -127,7 +127,9 @@ plt.show();
 
 
     
-![png](output_26_0.png)
+![output_26_0](https://user-images.githubusercontent.com/57588650/107350101-5c76c800-6b0c-11eb-8712-ef026d0871cd.png)
+
+
     
 
 
