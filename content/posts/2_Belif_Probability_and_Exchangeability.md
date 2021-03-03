@@ -377,7 +377,7 @@ $$
 $$
 
 $$
-= \int_{- \infty}^{y} \frac{1}{\sqrt{2 \pi \sigma}} exp \left\{ - \frac{1}{2} \left( \frac{y - \mu}{\sigma} \right) ^2 \right\} dy
+= \int_{- \infty}^{y} \frac{1}{\sqrt{2 \pi \sigma}} exp \left \{ - \frac{1}{2} \left ( \frac{y - \mu}{\sigma} \right ) ^2 \right \} dy
 $$
 
 즉,
