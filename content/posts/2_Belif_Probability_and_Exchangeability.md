@@ -73,7 +73,7 @@ $\textbf{P3}$ $\text{Pr}(\text{F} \cap \text{G} | \text{H}) = \text{Pr}(\text{G}
 
 **정의 1 (분할)** 
 
-집합들의 모음 $( \text{H}_{1}, ... , \text{H}_{k} )$는 만약 다음과 같다면 또 다른 집합 $\mathcal{H}$의 분할(partition)입니다.
+집합들의 모음 $( H_1, ..., H_k )$는 만약 다음과 같다면 또 다른 집합 $\mathcal{H}$의 분할(partition)입니다.
 
 1. 사건들은 연결되어있지 않다(이것을 $H_i \cap H_j = \emptyset \ for \ i \neq j ;$라고 씁니다)
 
