@@ -383,7 +383,7 @@ $$
 즉,
 
 $$
-p(y|\mu, \sigma^2) = dnorm(y,\mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma}} exp \left\{ - \frac{1}{2} \left(\frac{y - \mu}{\sigma} \right)^2 \right\}.
+p(y|\mu, \sigma^2) = dnorm(y,\mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma}} exp \left( - \frac{1}{2} \left(\frac{y - \mu}{\sigma} \right)^2 \right).
 $$
 
 입니다.
@@ -446,14 +446,17 @@ $$
 미지의 수량 Y에 대한 평균 또는 기댓값은 다음과 같습니다.
 
 $$
-E[Y] = \Sigma_{y \in \mathcal{Y}} \ \ \text{if Y is discrete ;} \\
+E[Y] = \Sigma_{y \in \mathcal{Y}} \ \ \text{if Y is discrete ;} 
+$$
+
+$$
 E[Y] = \int_{y \in \mathcal{Y}} y p(y) \ dy \ \ \text{if Y is continuous.}
 $$
 
 평균이란 분포의 덩어리의 중앙입니다. 그러나 보통은 다음의 둘 각각과 같지 않습니다.
 
 $$
-\text{ 최빈값(mode) : "가장 높은 확률을 가지는 Y의 값" 또는} \\
+\text{ 최빈값(mode) : "가장 높은 확률을 가지는 Y의 값" 또는}\\
 \text{ 중위수(median) : "분포의 가운데에 위치한 Y의 값}
 $$
 
