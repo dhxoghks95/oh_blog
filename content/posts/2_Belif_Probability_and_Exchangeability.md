@@ -1,8 +1,9 @@
 ---
-title: A First Cource in Bayesian Statistical Methods Chapter 2. Belif, Probability and Exchangeability
-date: 2021-03-02T20:09:32+09:00
-categories : ["A First Course In Bayesian Statistical Methods"]
-tags : ["Bayesian", "Python"]
+title: A First Course in Bayesian Statistical Methods Chapter 2. Belif, Probability and Exchangeability
+author : 오태환
+date: '2021-03-02T20:09:32+09:00'
+categories: ["A First Course In Bayesian Statistical Methods"]
+tags: ["Bayesian", "Python"]
 ---
 
 # A First Course in Bayesian Statistical Methods
