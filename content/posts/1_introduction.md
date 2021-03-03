@@ -330,9 +330,14 @@ $$
 
     
 $$
-\text{SSR}(\beta : \lambda) 
+SSR( \beta : \lambda) 
 = \Sigma^{n}_{i = 1} (y_i - x_i^{T} \beta)^2 + \lambda \Sigma^{p}_{j=1} |\beta_j|
 $$
+ 
+
+
+
+
 
 
 
