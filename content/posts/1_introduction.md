@@ -325,7 +325,7 @@ $$
 
  
 $$
-SSR(\Beta : \lambda) = \sum^n_{i=1}(y_i - x_i^T \Beta)^2 + \lambda \sum^p_{j=1} |\beta_j|
+SSR(\beta : \lambda) = \sum^n_{i=1}(y_i - x_i^T \beta)^2 + \lambda \sum^p_{j=1} |\beta_j|
 $$
 
 
