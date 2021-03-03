@@ -359,7 +359,10 @@ $$
 이산형일 경우과 마찬가지로, $Y$에 대한 확률 상태(probability statement)는 pdf를 통해 구할 수 있습니다: $\text{Pr}(Y \in A) = \int_{y \in A} p(y) dy$ 이고, 만약 $A$와 $B$가 $\mathcal{Y}$의 연결되지 않은 부분집합이라면 다음이 성립합니다.
 
 $$
-\mathcal{Pr}( Y \in A \ or \ Y \in B) \equiv \text{Pr}(A \in A \cup B) = \text{Pr}(Y \in A) + \text{Pr}(Y \in B) \\
+\mathcal{Pr}( Y \in A \ or \ Y \in B) \equiv \text{Pr}(A \in A \cup B) = \text{Pr}(Y \in A) + \text{Pr}(Y \in B)
+$$
+
+$$
 = \int_{y \in A} p(y) dy + \int_{y \in B} p(y) dy.
 $$
 
@@ -370,7 +373,11 @@ $$
 우리가 $\mathcal{Y} = ( - \infty, \infty)$위에 있는 모집단에서 표본을 추출하고, 모집단의 평균이 $\mu$, 분산은 $\sigma^2$라는 것을 안다고 가정합시다. 평균이 $\mu$이고 분산이 $\sigma^2$인 모든 확률 분포 중, 가장 "넓게 퍼져있고" 또는 엔트로피라고 불리는 지표의 방식으로 말하면 "diffuse"인 것은 정규분포(normal($\mu, \sigma^2$))이고, 다음과 같은 cdf를 가집니다.
 
 $$
-\text{Pr}( Y \leq y | \mu, \sigma^2) = F(y) = \int_{- \infty}^{y} \frac{1}{\sqrt{2 \pi \sigma}} exp \left\{ - \frac{1}{2} \left( \frac{y - \mu}{\sigma} \right) ^2 \right\} dy
+\text{Pr}( Y \leq y | \mu, \sigma^2) = F(y) 
+$$
+
+$$
+= \int_{- \infty}^{y} \frac{1}{\sqrt{2 \pi \sigma}} exp \left\{ - \frac{1}{2} \left( \frac{y - \mu}{\sigma} \right) ^2 \right\} dy
 $$
 
 즉,
