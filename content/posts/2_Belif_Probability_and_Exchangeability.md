@@ -881,10 +881,11 @@ $$
 확률 분포 $p(\theta)$는 우리의 믿음 모델 $p(y_1, ..., y_n)$로 부터 추론된 {$Y_1, Y_2, ...$}의 결과에 대한 우리의 믿음을 나타냅니다. 더 정확하게 표현하자면
 
 $$
-\begin{align}
-p(\theta) \text{는 이진(binary) 케이스에서 우리의 lim}_{n \rightarrow \infty} \Sigma Y_i / n \text{에 대한 믿음을 나타냅니다} \newline
+p(\theta) \text{는 이진(binary) 케이스에서 우리의 lim}_{n \rightarrow \infty} \Sigma Y_i / n \text{에 대한 믿음을 나타냅니다} 
+$$
+
+$$
 p(\theta) \text{는 일반적인(general) 케이스에서 우리의 각각의 c에 대한 lim}_{n \rightarrow \infty} \Sigma (Y_i \leq c) / n  \text{에 관한 믿음을 나타냅니다}
-\end{align}
 $$
 
 이것과 이전 섹션에서의 주요 아이디어는 다음과 같이 요약될 수 있습니다.
