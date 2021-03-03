@@ -780,8 +780,10 @@ $p(y_1, ..., y_n)$이 $Y_1, ... , Y_n$의 결합 밀도 함수라고 합시다. 
 다음과 같은 두 개의 확률이 할당되었다고 생각합시다.
 
 $$
+\begin{align}
 Pr(Y_{10} = 1) = a \newline
 Pr(Y_{10} = 1 | Y_1 = Y_2 = ... = Y_8 = Y_9 = 1) = b
+\end{align}
 $$
 
 a < b, a = b, a > b 중 어떤 쪽인지 알 수 있나요? 만약 $a \neq b$라면 $Y_10$은 $Y_1, ..., Y_9$에 독립이 아닙니다.
@@ -791,17 +793,21 @@ a < b, a = b, a > b 중 어떤 쪽인지 알 수 있나요? 만약 $a \neq b$라
 누군가가 당신에게 1,272명의 답변자들 중 행복하다는 비율의 수적인(numerical) 값 $\theta$를 말해줬다고 가정합시다. 다음과 같은 확률 할당이 합리적이라고 생각하시나요?
 
 $$
+\begin{align}
 Pr(Y_{10} = 1 | \theta) \approx^{?} \theta \newline
 Pr(Y_{10} = 1 | Y_1 = y_1, ... , Y_9 = y_9, \theta) \approx^{?} \theta \newline
 Pr(Y_9 = 1 | Y_1 = y_1, ..., Y_8 = y_8 , Y_{10} = y_{10}, \theta) \approx^{?} \theta
+\end{align}
 $$
 
 만약 이러한 확률들이 합리적이라면, 우리는 $Y_i$들을 $\theta$가 주어졌을 때 조건부 i.i.d이거나 최소한 근사적으로 그렇다고 생각할 수 있습니다. 모집단의 크기인 1,272는 샘플 크기인 10보다 훨씬 큽니다. 이러한 케이스에서는 비복원 추출은 근사적으로 i.i.d. 복원 추출과 같습니다. 조건부 독립을 가정하면 다음과 같은 식을 구할 수 있습니다.
 
 $$
+\begin{align}
 Pr(Y_i = y_i | \theta, Y_j = y_j, j \neq i) = \theta^{y_i}(1 - \theta)^{1-y_i} \newline
 Pr(Y_1 = y_1, ... , Y_{10} = y_{10} | \theta) = \prod^{10}_{i = 1} \theta^{y_i}(1 - \theta) ^ {1 - y_i} \newline
 = \theta^{\Sigma y_i} (1 - \theta)^{10 - \Sigma y_i}
+\end{align}
 $$
 
 만약 $\theta$가 확실히 정해지지 않았다면, 그것에 대한 믿음을 사전 분포인 $p(\theta)$로 표현합니다. $Y_1, ..., Y_{10}$의 주변 결합 분포(marginal joint distribution)은 다음과 같습니다.
@@ -813,9 +819,11 @@ $$
 이제 위에서 주어진 세 개의 이진 수열들에 대한 우리들의 확률을 생각해봅시다.
 
 $$
+\begin{align}
 p(1,0,0,1,0,1,1,0,1,1) = \int \theta^6(1-\theta)^4 p(\theta) d\theta \newline
 p(1,0,1,0,1,1,0,1,1,0) = \int \theta^6(1-\theta)^4 p(\theta) d\theta \newline
 p(1,1,0,0,1,1,0,0,1,1) = \int \theta^6(1-\theta)^4 p(\theta) d\theta 
+\end{align}
 $$
 
 이와 같은 믿음의 모델에서는 $Y_1, ..., Y_n$이 교환 가능한 것으로 보입니다.
@@ -873,8 +881,10 @@ $$
 확률 분포 $p(\theta)$는 우리의 믿음 모델 $p(y_1, ..., y_n)$로 부터 추론된 {$Y_1, Y_2, ...$}의 결과에 대한 우리의 믿음을 나타냅니다. 더 정확하게 표현하자면
 
 $$
+\begin{align}
 p(\theta) \text{는 이진(binary) 케이스에서 우리의 lim}_{n \rightarrow \infty} \Sigma Y_i / n \text{에 대한 믿음을 나타냅니다} \newline
 p(\theta) \text{는 일반적인(general) 케이스에서 우리의 각각의 c에 대한 lim}_{n \rightarrow \infty} \Sigma (Y_i \leq c) / n  \text{에 관한 믿음을 나타냅니다}
+\end{align}
 $$
 
 이것과 이전 섹션에서의 주요 아이디어는 다음과 같이 요약될 수 있습니다.
@@ -886,9 +896,11 @@ $$
 어떤 조건에서 "$Y_1, ..., Y_n$이 모든 $n$에 대하여 교환 가능하다" 라는 명제가 합리적일까요? 이 조건을 만족하려면, 우리는 교환 가능성과 반복 가능성을 만족해야합니다. 교환 가능성은 만약 라벨들이 아무런 정보가 없다면 만족합니다. 반복 가능성이 합리적인 상황은 다음과 같습니다. 
 
 $$
+\begin{align}
 Y_1, ... , Y_n \text{은 반복 가능한 실험의 결과이다.} \newline
 Y_1, ... , Y_n \text{은 유한한 모집단에서 복원 추출된 것이다.} \newline
 Y_1, ... , Y_n \text{은 무한한 모집단에서 비복원 추출된 것이다.}
+\end{align}
 $$
 
 
