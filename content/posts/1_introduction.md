@@ -298,7 +298,7 @@ $$
  
  
  
- 그리고 또한 $\hat{\beta}_{ols}$를 사용하는 것이 $\hat{\beta}_{\text{Bayes}}$ 보다 더 약한 관측값과 추정값과의 상관관계를 보인다는 점에 주목합시다. 
+ 그리고 또한 $\hat{\beta}_{ols}$를 사용하는 것이 $\hat{\beta}_{Bayes}$ 보다 더 약한 관측값과 추정값과의 상관관계를 보인다는 점에 주목합시다. 
  
  
  
@@ -330,21 +330,6 @@ $$
     
 $$
 \text{SSR}(\beta : \lambda) 
-$$
-
-
-
-
-
-
-
-
-
-
-
-
-
-$$
 = \Sigma^{n}_{i = 1} (y_i - x_i^T\beta)^2 + \lambda\Sigma^{p}_{j=1}|\beta_j|
 $$
 
