@@ -748,7 +748,7 @@ $$
 
 $$
 Y_i =  \begin{cases} 
-1 \ \ \text{참가자 i가 보통 행복하다고 답했을 때} \\ 
+1 \ \ \text{참가자 i가 보통 행복하다고 답했을 때} \newline
 0 \ \ \text{그 외} 
 \end{cases}
 $$
