@@ -21,8 +21,14 @@ tags: ["Bayesian", "Python"]
 $\text{F}, \text{G}, \text{H}$를 세계에 대한 서로 겹칠 수도 있는 세 가지 상태라고 합시다. 예를 들어 다음과 같습니다.
 
 $$
-\text{F} = \{ \text{a person votes for a left-of-center candidate}\} \\ 
-\text{G} = \{ \text{a person's income is in the lowest 10% of the population}\} \\
+\text{F} = \{ \text{a person votes for a left-of-center candidate}\} 
+$$
+
+$$
+\text{G} = \{ \text{a person's income is in the lowest 10% of the population}\}
+$$
+
+$$
 \text{H} = \{ \text{a person lives in a large city}\}
 $$
 
@@ -65,7 +71,9 @@ $\textbf{P3}$ $\text{Pr}(\text{F} \cap \text{G} | \text{H}) = \text{Pr}(\text{G}
 
 ### 2.2 사건, 분할 그리고 베이즈 법칙
 
-**정의 1 (분할)** *집합들의 모음 $\{ \text{H}_{1}, ... , \text{H}_{k} \}$는 만약 다음과 같다면 또 다른 집합 $\mathcal{H}$의 분할(partition)입니다.*
+**정의 1 (분할)** 
+
+집합들의 모음 $( \text{H}_{1}, ... , \text{H}_{k} )$는 만약 다음과 같다면 또 다른 집합 $\mathcal{H}$의 분할(partition)입니다.
 
 1. 사건들은 연결되어있지 않다(이것을 $H_i \cap H_j = \emptyset \ for \ i \neq j ;$라고 씁니다)
 
@@ -95,9 +103,7 @@ $\{H_1, ..., H_K\}$를 $\mathcal{H}$의 분할이라고 가정합시다. $\text{
 
 ### Rule of total probability : $\Sigma^K_{k=1} \text{Pr}(H_k) = 1$
 
-### Rule of marginal probability : 
-
-$\text{Pr}(E) = \Sigma^K_{k=1} \text{Pr}(E \cap H_k) = \Sigma^K_{k=1} \text{Pr} (E | H_k) Pr(H_k) $
+### Rule of marginal probability : $\text{Pr}(E) = \Sigma^K_{k=1} \text{Pr}(E \cap H_k) = \Sigma^K_{k=1} \text{Pr} (E | H_k) Pr(H_k) $
 
 ### Bayes' rule : $\text{Pr}(H_j|E) = \frac{\text{Pr}(E|H_j) \text{Pr}(H_j) }{\text{Pr}(E)} = \frac{\text{Pr}(E|H_j) \text{Pr}(H_j)}{\Sigma^K_{k=1} \text{Pr}(E|H_k) \text{Pr}(H_k)}$ 
 
@@ -145,9 +151,18 @@ $$
 우리가 어떤 공공 기관장의 특정 후보를 지지하는 비율에 관심을 가지고 있다고 가정합시다. 그리고 다음과 같은 상황들이 있습니다.
 
 $$
-\mathcal{H} = \{ \text{A후보를 지지하는 비율의 모든 경우의 수} \} ; \\
-H_1 = \{\text{ 절반 초과의 유권자들이 A후보를 지지함 } \} ; \\
-H_2 = \{ \text{절반 이하의 유권자들이 A후보를 지지함} \} ; \\
+\mathcal{H} = \{ \text{A후보를 지지하는 비율의 모든 경우의 수} \} ; 
+$$
+
+$$
+H_1 = \{\text{ 절반 초과의 유권자들이 A후보를 지지함 } \} ; 
+$$
+
+$$
+H_2 = \{ \text{절반 이하의 유권자들이 A후보를 지지함} \} ; 
+$$
+
+$$
 E = \{ \text{100명 중 54명이 설문조사에서 A후보를 지지한다고 말함 }\}.
 $$
 
@@ -166,8 +181,14 @@ $$
 만약 F와 G가 H가 주어졌을 때 조건부 독립이라면, 다음은 항상 참입니다.
 
 $$
-\text{Pr}(G|H) \text{Pr}(F | H \cap G) =^{\text{always}} \text{Pr}(F \cap G|H) =^{\text{independence}} \text{Pr}(F|H) \text{Pr}(G|H) \\
-\text{Pr}(G|H)\text{Pr}(F|H \cap G) \ \ \ = \ \ \ \text{Pr}(F|H)\text{Pr}(G|H) \\
+\text{Pr}(G|H) \text{Pr}(F | H \cap G) =^{\text{always}} \text{Pr}(F \cap G|H) =^{\text{independence}} \text{Pr}(F|H) \text{Pr}(G|H) 
+$$
+
+$$
+\text{Pr}(G|H)\text{Pr}(F|H \cap G) \ \ \ = \ \ \ \text{Pr}(F|H)\text{Pr}(G|H) 
+$$
+
+$$
 \text{Pr}(F|H \cap G) \ \ \ = \ \ \ \text{Pr}(F|H).
 $$
 
@@ -219,7 +240,10 @@ Y를 확률 변수라고 하고 $\mathcal{Y}$를 Y가 가질 수 있는 모든 �
 일반적으로 Y에 대한 확률의 상태는 pdf로 부터 구할 수 있습니다. 예를 들어, $\text{Pr}(Y \in A) = \Sigma_{y \in A} p(y)$입니다. 만약 A와 B가 서로 연결되지 않은 $\mathcal{Y}$의 부분집합이라면 다음과 같은 식이 성립합니다.
 
 $$
-\text{Pr}( Y \in A \text{또는} Y \in B) \equiv \text{Pr}(Y \in A \cup B) = \text{Pr}(Y \in A) + \text{Pr}(Y \in B) \\
+\text{Pr}( Y \in A \text{또는} Y \in B) \equiv \text{Pr}(Y \in A \cup B) = \text{Pr}(Y \in A) + \text{Pr}(Y \in B) 
+$$
+
+$$
 = \Sigma_{y \in A}p(y) + \Sigma_{y \in B}p(y)
 $$
 
