@@ -47,8 +47,15 @@ p(y_1, ...., y_{129}) | \theta) = p(y_1|\theta) \ p(y_2|\theta) \ ... \ p(y_{129
 $$
 
 
+
+
+
 $$
-\text{=} \prod^{129}_{i=1} \theta^{y_i}(1-\theta)^{1 - y_i} = \theta^{\Sigma^{129}_{i=1} y_i}(1-\theta)^{129 - \Sigma^{129}_{i=1} y_i}
+\text{=} \prod^{129}_{i=1} \theta^{y_i}(1-\theta)^{1 - y_i} 
+$$
+
+$$
+\text{=} \theta^{\Sigma^{129}_{i=1} y_i}(1-\theta)^{129 - \Sigma^{129}_{i=1} y_i}
 $$
 
 
