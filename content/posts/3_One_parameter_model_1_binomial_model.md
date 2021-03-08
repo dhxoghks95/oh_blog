@@ -442,15 +442,7 @@ p(\theta|y) = \frac{p(\theta)p(y|\theta)}{p(y)}
 $$
 
 
-이고, 다음과 같이 쓸 수 있습니다.
-
-
-
-$$
-\frac{1}{p(y)} \times \underbrace{\frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \theta^{a-1}(1-\theta)^{b-1}}_{p(\theta)} \times \underbrace{\binom n y \theta^y (1-\theta)^{n-y}}_{p(y|\theta)}
-$$
-
-
+![IMG_2F7FD9C7A78D-1](https://user-images.githubusercontent.com/57588650/110324147-f0c74280-8058-11eb-9410-70cbc9cef489.png)
 
 
 
