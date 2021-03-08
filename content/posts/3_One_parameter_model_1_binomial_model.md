@@ -49,7 +49,11 @@ $$
 
 
 $$
-= \prod^{129}_{i=1} \theta^{y_i} (1 - \theta)^{1 - y_i} = \theta^{\sum^{129}_{i=1}y_i}(1-\theta)^{129 - \sum^{129}_{i=1}y_i}
+= \prod^{129}_{i=1} \theta^{y_i} (1 - \theta)^{1 - y_i}
+$$
+
+$$
+= \theta^{\sum^{129}_{i=1}y_i}(1-\theta)^{129 - \sum^{129}_{i=1}y_i}
 $$
 
 이제 필요한 것은 사전 분포입니다.
@@ -444,9 +448,11 @@ $$
 p(\theta|y) = \frac{p(\theta)p(y|\theta)}{p(y)}
 $$
 
+
 $$
 = \frac{1}{p(y)} \times \underbrace{\frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \theta^{a-1}(1-\theta)^{b-1}}_{p(\theta)} \times \underbrace{\binom n y \theta^y (1-\theta)^{n-y}}_{p(y|\theta)}
 $$
+
 
 $$
 = c(n,y,a,b) \times \theta^{a + y - 1} (1-\theta)^{b+n-y-1} \ , \ \ (c(n,y,a,b) = n,y,a,b \text{에 의존하는 정규화 상수})
@@ -464,11 +470,11 @@ $$
 
 앞으로 계속해서 이를 활용해 우리는 사후 분포가 어떠한 알려진 확률 밀도 함수와 비례하고, 따라서 그 확률 밀도 함수와 반드시 같다는 것을 찾아내볼 것입니다. 
 
-**켤레성(Conjugacy)**
+### 켤레성(Conjugacy)
 
 지금까지 배운 "베타 사전 분포와 이항 표본 모델이 결합되어 베타 사후 분포를 만드는 것"을 베타 사전 분포의 클래스가 이항 표본 모델의 "켤레(congutate)"라고 부릅니다.
 
-### 정의 4 (켤레(Conjugate))
+**정의 4 (켤레(Conjugate))**
 
 만약 다음이 성립한다면, $\theta$의 사전 분포의 클래스 $\mathcal{P}$를 표본 모델 $p(y|\theta)$의 "켤레(conjugate)"라고 부릅니다.
 
