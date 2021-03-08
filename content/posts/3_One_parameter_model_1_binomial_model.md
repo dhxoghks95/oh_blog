@@ -47,14 +47,7 @@ p(y_1, ...., y_{129}) | \theta) = p(y_1|\theta) \ p(y_2|\theta) \ ... \ p(y_{129
 $$
 
 
-
-
-
-$$
-\text{=} \prod^{129}_{i=1} \theta^{y_i}(1-\theta)^{1 - y_i} 
-$$
-
-= $\prod^{129}_{i=1} \theta^{y_i} (1 - \theta)^{1 - y_i} = \theta^{\sum^{129}_{i=1}y_i}(1-\theta)^{129 - \sum^{129}_{i=1}y_i}$
+<img width="341" alt="스크린샷 2021-03-08 오후 9 48 04" src="https://user-images.githubusercontent.com/57588650/110323585-24559d00-8058-11eb-9b98-966c2c8cb61e.png">
 
 
 이제 필요한 것은 사전 분포입니다.
