@@ -452,12 +452,12 @@ p(\theta|y) = \frac{p(\theta)p(y|\theta)}{p(y)}
 $$
 
 
-
+이고, 다음과 같이 쓸 수 있습니다.
 
 
 
 $$
-= \frac{1}{p(y)} \times \underbrace{\frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \theta^{a-1}(1-\theta)^{b-1}}_{p(\theta)} \times \underbrace{\binom n y \theta^y (1-\theta)^{n-y}}_{p(y|\theta)}
+\frac{1}{p(y)} \times \underbrace{\frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \theta^{a-1}(1-\theta)^{b-1}}_{p(\theta)} \times \underbrace{\binom n y \theta^y (1-\theta)^{n-y}}_{p(y|\theta)}
 $$
 
 
