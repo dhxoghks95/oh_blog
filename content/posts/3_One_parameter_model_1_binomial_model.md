@@ -43,8 +43,10 @@ $$
 즉 {$y_i, ..., y_{129}$}의 잠재적 산출물의 확률은 다음과 같습니다.
 
 $$
-p(y_1, ..., y_{129} | \theta) = p(y_1|\theta) \ p(y_2|\theta) \ ... \ p(y_{129}|\theta)
+p(y_1, ...., y_{129}) | \theta) = p(y_1|\theta) \ p(y_2|\theta) \ ... \ p(y_{129}|\theta)
 $$
+
+
 
 $$
 = \prod^{129}_{i=1} \theta^{y_i} (1 - \theta)^{1 - y_i} = \theta^{\sum^{129}_{i=1}y_i}(1-\theta)^{129 - \sum^{129}_{i=1}y_i}
