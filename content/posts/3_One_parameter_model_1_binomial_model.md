@@ -54,8 +54,9 @@ $$
 \text{=} \prod^{129}_{i=1} \theta^{y_i}(1-\theta)^{1 - y_i} 
 $$
 
+=
 
-![IMG_2F7FD9C7A78D-1](https://user-images.githubusercontent.com/57588650/110321725-70eba900-8055-11eb-8acb-2e52dab829a4.jpeg){: width="20" height="20"}
+![IMG_2F7FD9C7A78D-1](https://user-images.githubusercontent.com/57588650/110321725-70eba900-8055-11eb-8acb-2e52dab829a4.jpeg)
 
 
 이제 필요한 것은 사전 분포입니다.
