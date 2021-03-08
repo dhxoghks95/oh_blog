@@ -49,8 +49,12 @@ $$
 
 
 $$
-= \prod^{129}_{i=1} \theta^{y_i} (1 - \theta)^{1 - y_i} =    \theta^{\Sigma^{129}_{i=1}y_i}(1-\theta)^{129  -  \Sigma^{129}_{i=1}y_i}
+= \prod^{129}_{i=1} \theta^{y_i} (1 - \theta)^{1 - y_i} \
 $$
+
+$$
+= \theta^{\Sigma^{129}_{i=1} y_i}(1-\theta)^{129  -  \Sigma^{129}_{i=1} y_i} \
+$$ 
 
 
 이제 필요한 것은 사전 분포입니다.
