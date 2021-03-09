@@ -233,7 +233,7 @@ $$
 $n$이 크다면, 데이터로 부터의 정보가 사전 정보를 압도합니다
 
 $$
-if n >> b \Rightarrow E[\theta|y_1, ..., y_n] \approx \bar{y},
+if \ \ \ n >> b \Rightarrow E[\theta|y_1, ..., y_n] \approx \bar{y},
 Var[\theta|y_1, ..., y_n] \approx \bar{y}/n
 $$
 
@@ -324,9 +324,9 @@ $$
 
 데이터의 경험적인 분포는 **그림. 3.9**에 나와있고, 그룹합과 평균은 다음과 같습니다.
 
-학사 학위 미만 : $n_1 = 111, \sum^{n_1}_{i=1} Y_{i,1} = 217, \bar{Y}_1 = 1.95$
+학사 학위 미만 : $n_1 = 111, \sum_{i=1}^{n_1} Y_{i,1} = 217, \bar{Y}_1 = 1.95$
 
-학사 학위 이상 : $n_2 = 44, \sum^{n_2}_{i=1} Y_{i,2} = 66, \bar{Y}_2 = 1.50$
+학사 학위 이상 : $n_2 = 44, \sum_{i=1}^{n_2} Y_{i,2} = 66, \bar{Y}_2 = 1.50$
 
 {$\theta_1, \theta_2$} $\sim$ i.i.d. gamma(a=2, b=1)일 때, 다음과 같은 사후 분포를 가집니다.
 
@@ -500,9 +500,7 @@ $$
 p(\phi|y_1, ..., y_n) \propto p(\phi) p(y_1, ..., y_n | \phi) 
 $$
 
-$$
-= \underbrace{p(\phi)}_{\kappa(n_0, t_0) c(\phi)^{n_0} e^{n_0 t_0 \phi}} \prod_{i=1}^n \underbrace{p(y_i|\theta)}_{h(y)c(\phi)e^{\phi t(y)}} 
-$$
+![output](https://user-images.githubusercontent.com/57588650/110475813-aa3f1a00-8124-11eb-9b0a-e6261449f803.png)
 
 이 때, $\kappa(n_0, t_0), h(y)$가 상수항이므로
 
