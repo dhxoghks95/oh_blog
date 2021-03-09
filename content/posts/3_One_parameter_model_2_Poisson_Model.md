@@ -500,7 +500,7 @@ $$
 p(\phi|y_1, ..., y_n) \propto p(\phi) p(y_1, ..., y_n | \phi) 
 $$
 
-![output](https://user-images.githubusercontent.com/57588650/110475813-aa3f1a00-8124-11eb-9b0a-e6261449f803.png)
+![output](https://user-images.githubusercontent.com/57588650/110476484-5e40a500-8125-11eb-81df-cf529b190032.png)
 
 이 때, $\kappa(n_0, t_0), h(y)$가 상수항이므로
 
@@ -535,7 +535,9 @@ $$
 
 파라미터 $n_0$는 그 사전 분포가 얼마나 많은 정보를 포함하고 있는지 포여주는 측도입니다. 
 
-이 측도를 계량화하는 방법은 많지만, 가장 쉬운 것은 $\phi$에 대한 함수로서 $p(\phi|n_0, t_0)$이 $n_0$개의 "사전 관찰값" $\tilde{y_1}, ..., \tilde{y}_{n_0}$으로부터 온 우도(likelihood)인 $p(\tilde{y}_1, ..., \tilde{y}_{n_0}|\phi)$과 같은 모양을 가진다는 것을 사용하는 것입니다. 
+이 측도를 계량화하는 방법은 많지만, 가장 쉬운 것은 $\phi$에 대한 함수로서 $p(\phi|n_0, t_0)$이 $n_0$개의 "사전 관찰값" $\tilde{y_1}, ..., \tilde{y}_{n_0}$으로부터 온 
+
+우도(likelihood)인 p($\tilde{y}_1, ..., \tilde{y}_{n_0}|\phi$)과 같은 모양을 가진다는 것을 사용하는 것입니다. 
 
 
 이 때 $\Sigma t(\tilde{y}_i)/n_0 = t_0$입니다. 이것을 사용해서, 사전 분포 $p(\phi|n_0, t_0)$이 모집단으로 부터 독립적으로 추출한 $n_0$개의 샘플과 같은 양의 정보를 가지고 있다는 것을 알 수 있게됩니다. 
