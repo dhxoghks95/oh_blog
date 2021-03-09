@@ -242,13 +242,23 @@ $$
 추가적인 데이터가 어떤 값을 가질지에 대한 예측은 사후 예측 분포를 통해 구할 수 있습니다.
 
 $$
-\begin{align}
-p(\tilde{y}|y_1, ..., y_n) = \int^{\infty}_0 p(\tilde{y}|\theta, y_1, ..., y_n)p(\theta|y_1, ..., y_n) d\theta \ \ \ (\text{by 주변 확률의 법칙})\newline
-= \int p(\tilde{y}|\theta)p(\theta|y_1, ..., y_n) d\theta \ (\theta \text{가 주어졌을 때} \ y_1, ..., y_n \ \text{는 조건부 독립})\newline
-= \int dpois(\tilde{y}, \theta)dgamma(\theta, a+\Sigma y_i, b+n) d\theta \newline
-= \int \bigg( \frac{1}{\tilde{y}!} \theta^{\tilde{y}} e^{-\theta} \bigg) \bigg( \frac{(b+n)^{a + \Sigma y_i}}{\Gamma(a+\Sigma y_i)} \theta^{a + \Sigma y_i -1} e^{-(b+n)\theta} \bigg) d\theta \newline
+p(\tilde{y}|y_1, ..., y_n) = \int^{\infty}_0 p(\tilde{y}|\theta, y_1, ..., y_n)p(\theta|y_1, ..., y_n) d\theta \ \ \ (\text{by 주변 확률의 법칙})
+$$
+
+$$
+= \int p(\tilde{y}|\theta)p(\theta|y_1, ..., y_n) d\theta \ (\theta \text{가 주어졌을 때} \ y_1, ..., y_n \ \text{는 조건부 독립})
+$$
+
+$$
+= \int dpois(\tilde{y}, \theta)dgamma(\theta, a+\Sigma y_i, b+n) d\theta 
+$$
+
+$$
+= \int \bigg( \frac{1}{\tilde{y}!} \theta^{\tilde{y}} e^{-\theta} \bigg) \bigg( \frac{(b+n)^{a + \Sigma y_i}}{\Gamma(a+\Sigma y_i)} \theta^{a + \Sigma y_i -1} e^{-(b+n)\theta} \bigg) d\theta 
+$$
+
+$$
 = \frac{(b+n)^{a + \Sigma y_i}}{\Gamma(\tilde{y} + 1) \Gamma(a+\Sigma y_i)} \int^{\infty}_{0} \theta^{a + \Sigma y_i + \tilde{y} - 1} e^{-(b+n+1)\theta} d\theta.
-\end{align}
 $$
 
 맨 뒤의 적분은 복잡해보이지만, 베타 사후 분포 때와 마찬가지로 감마 pdf를 적분한 값이 1이라는 사실을 사용하면 됩니다.
@@ -487,11 +497,13 @@ $$
 Diaconis와 Ylvisaker (1979)는 지수분포족에 모두 먹히는, 특히 사전 분포가 $p(\phi|n_0, t_0) = \kappa(n_0, t_0) c(\phi)^{n_0} e^{n_0 t_0 \phi}$ 형태에 일반적으로 적용되는 켤레 사전 분포에 대해 연구했습니다. 이러한 사전 분포와 $Y_1, ..., Y_n \sim \text{i.i.d.} \ p(y|\phi)$으로 부터 뽑힌 정보를 결합하면 다음과 같은 사후 분포를 얻을 수 있게 됩니다.
 
 $$
-\begin{align}
-p(\phi|y_1, ..., y_n) \propto p(\phi) p(y_1, ..., y_n | \phi) \newline
-= \underbrace{p(\phi)}_{\kappa(n_0, t_0) c(\phi)^{n_0} e^{n_0 t_0 \phi}} \prod_{i=1}^n \underbrace{p(y_i|\theta)}_{h(y)c(\phi)e^{\phi t(y)}} 
-\end{align}
+p(\phi|y_1, ..., y_n) \propto p(\phi) p(y_1, ..., y_n | \phi) 
 $$
+
+$$
+= \underbrace{p(\phi)}_{\kappa(n_0, t_0) c(\phi)^{n_0} e^{n_0 t_0 \phi}} \prod_{i=1}^n \underbrace{p(y_i|\theta)}_{h(y)c(\phi)e^{\phi t(y)}} 
+$$
+
 이 때, $\kappa(n_0, t_0), h(y)$가 상수항이므로
 
 $$
@@ -523,7 +535,12 @@ $$
 
 이때문에 $t_0$은 $t(Y)$의 사전 기댓값을 나타냅니다. 
 
-파라미터 $n_0$는 그 사전 분포가 얼마나 많은 정보를 포함하고 있는지 포여주는 측도입니다. 이 측도를 계량화하는 방법은 많지만, 가장 쉬운 것은 $\phi$에 대한 함수로서 $p(\phi|n_0, t_0)$이 $n_0$개의 "사전 관찰값" $\tilde{y_1}, ..., \tilde{y}_{n_0}$으로부터 온 우도(likelihood)인 $p(\tilde{y}_1, ..., \tilde{y}_{n_0}|\phi)$과 같은 모양을 가진다는 것을 사용하는 것입니다. 이 때 $\Sigma t(\tilde{y}_i)/n_0 = t_0$입니다. 이것을 사용해서, 사전 분포 $p(\phi|n_0, t_0)$이 모집단으로 부터 독립적으로 추출한 $n_0$개의 샘플과 같은 양의 정보를 가지고 있다는 것을 알 수 있게됩니다. 
+파라미터 $n_0$는 그 사전 분포가 얼마나 많은 정보를 포함하고 있는지 포여주는 측도입니다. 
+
+이 측도를 계량화하는 방법은 많지만, 가장 쉬운 것은 $\phi$에 대한 함수로서 $p(\phi|n_0, t_0)$이 $n_0$개의 "사전 관찰값" $\tilde{y_1}, ..., \tilde{y}_{n_0}$으로부터 온 우도(likelihood)인 $p(\tilde{y}_1, ..., \tilde{y}_{n_0}|\phi)$과 같은 모양을 가진다는 것을 사용하는 것입니다. 
+
+
+이 때 $\Sigma t(\tilde{y}_i)/n_0 = t_0$입니다. 이것을 사용해서, 사전 분포 $p(\phi|n_0, t_0)$이 모집단으로 부터 독립적으로 추출한 $n_0$개의 샘플과 같은 양의 정보를 가지고 있다는 것을 알 수 있게됩니다. 
 
 **예시 : 이항 모델**
 

@@ -1,6 +1,5 @@
 ---
-title: A First Course in Bayesian Statistical Methods Chapter 3 . One parameter model
-subtitle : 1. Binomial Model
+title: A First Course in Bayesian Statistical Methods Chapter 3 . One parameter model, 1. Binomial Model
 date: 2021-03-08T20:50:13+09:00
 categories: ["A First Course In Bayesian Statistical Methods"]
 tags: ["Bayesian", "Python"]
