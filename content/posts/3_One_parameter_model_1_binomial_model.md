@@ -71,7 +71,7 @@ $$
 베이즈의 법칙을 사용해 사전 분포와 위의 표본 추출 모델을 결합하면 다음과 같습니다.
 
 $$
-p(\theta | y_1, ..., y_{129}) = \frac{y_1, ..., y_{129})p(\theta)}{p(y_1, ..., y_{129}} ( \rightarrow \ p(\theta) = 1)
+p(\theta | y_1, ..., y_{129}) = \frac{p(y_1, ..., y_{129}|\theta)p(\theta)}{p(y_1, ..., y_{129})} ( \rightarrow \ p(\theta) = 1)
 $$
 
 $$
