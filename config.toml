@@ -17,6 +17,8 @@ copyright = "Tai Hwan Oh"
 opengraph = true
 authorbox = true
 mathjax = true
+mathjaxPath = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js" # Specify MathJax path
+mathjaxConfig = "TeX-AMS-MML_HTMLorMML" # Specify MathJax config
 
 [Params.sidebar]
 home = "left"
@@ -30,4 +32,4 @@ tags_counter = false
 
 [Params.widgets.social]
 
-github = "https://github.com/dhxoghks95"
+github = "dhxoghks95"
