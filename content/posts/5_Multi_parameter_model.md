@@ -76,6 +76,7 @@ p(log(\sigma)) \propto 1
 $$
 
 > 왜 p($\sigma$) $\propto$ 1을 안쓰고 $p(log(\sigma)) \ \propto \ 1$을 균등분포로 쓰나요? 
+
 > $p(\sigma^2) \propto 1/\sigma^2$로 만들기 위해섭니다!
 $X = log(\sigma)$라고 했을 때, $T(X) = \sigma = e^X = Y$로 변환해봅시다. 그렇다면 역변환은 $T^{-1}(Y) = log(Y)$이고, 그렇다면 jacobian은 $|\frac{\delta X}{\delta Y}| = \frac{1}{Y}$입니다. 따라서 우리가 $p(X) \propto 1$을 가정했기 때문에, $p(Y)=p(\sigma) = |\frac{\delta X}{\delta Y}|p(log(Y)) \propto 1/Y$가 됩니다.
 
@@ -140,11 +141,10 @@ $$
 \int \frac{1}{\sqrt{2\pi\sigma^2/n}} exp\bigg(-\frac{(\bar{y} - \mu)^2}{2\frac{\sigma^2}{n}} \bigg) = 1
 $$
 
-$$
-$$
+입니다. 따라서
 
 $$
-\therefore \int exp\bigg( -\frac{1}{2\sigma^2} n(\bar{y} - \mu)^2 \bigg) d\mu = \sqrt{2\pi\sigma^2/n}
+\int exp\bigg( -\frac{1}{2\sigma^2} n(\bar{y} - \mu)^2 \bigg) d\mu = \sqrt{2\pi\sigma^2/n}
 $$
 
 이고, 따라서 $p(\sigma^2|y)$는
