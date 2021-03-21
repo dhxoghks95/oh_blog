@@ -65,7 +65,20 @@ p(\theta_1|y) = \int p(\theta_1,\theta_2|y)d\theta_2 \newline
 
 ### noninformative 사전 분포
 
-noninformative prior(=vague prior)는 앞에서 배운 uniform 분포, beta(1,1) 분포와 같이 사후 분포에 아무런 영향을 주지 못하는 사전분포를 말하는 것입니다. 이 예시에서 $\mu, \sigma)$에 대한 vague 사전 분포는 $\mu$(=location)와 $\sigma$(=scale) 파라미터의 사전 독립을 가정했을 때, $(\mu, log\sigma)$에서 균등 분포이고 다음과 같이 표현할 수 있습니다.(BDA 52p 참조)
+noninformative prior(=vague prior)는 앞에서 배운 uniform 분포, beta(1,1) 분포와 같이 사후 분포에 아무런 영향을 주지 못하는 사전분포를 말하는 것입니다. 이 예시에서 $\mu, \sigma)$에 대한 vague 사전 분포는 $\mu$(=location)와 $\sigma$(=scale) 파라미터의 사전 독립을 가정했을 때, $\mu$와 $\sigma$는 각각 다음과 같은 균등 분포를 가정하며
+
+$$
+p(\mu) = 1
+$$
+
+$$
+p(log(\sigma)) = 1
+$$
+
+> cf) 왜 p(\sigma) = 1을 안쓰고 p(log(\sigma)) = 1을 균등분포로 쓰나요?
+
+
+다음과 같이 표현할 수 있습니다.(BDA 52p 참조)
 
 $$
 p(\mu, \sigma^2) = p(\mu) p(\sigma^2) \propto (\sigma^2)^{-1}
