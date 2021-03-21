@@ -16,8 +16,7 @@ description = "오! 데이터 사이언스 블로그입니다."
 copyright = "Tai Hwan Oh"
 opengraph = true
 authorbox = true
-katex = true
-markup = "mmark"
+mathjax = true
 
 
 [Params.sidebar]
