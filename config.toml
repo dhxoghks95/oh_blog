@@ -16,9 +16,9 @@ description = "오! 데이터 사이언스 블로그입니다."
 copyright = "Tai Hwan Oh"
 opengraph = true
 authorbox = true
-mathjax = true
-mathjaxPath = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js" # Specify MathJax path
-mathjaxConfig = "TeX-AMS-MML_HTMLorMML" # Specify MathJax config
+katex = true
+markup = "mmark"
+
 
 [Params.sidebar]
 home = "left"
