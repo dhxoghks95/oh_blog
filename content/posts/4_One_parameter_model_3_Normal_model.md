@@ -47,7 +47,7 @@ $$
  켤레 사전 확률 밀도는 $\theta$에 대한 사후 분포가 exponential의 이차식 제곱꼴이고 따라서 정규분포라는 점을 알려줍니다. 그러나 이것의 특정한 형태를 알기 위해서는 대수적인(algebra) 스킬이 필요합니다. 사후 확률 밀도 함수에서 $\theta$를 제외한 모든 변수가 상수항으로 취급되고, 다음과 같은 조건부 확률 밀도 함수를 만들어냅니다.
  
 $$
-p(\theta|y) \propto exp \bigg(-\frac{1}{2} \bigg( \frac{(y-\theta)^2}{\sigma^2} + \frac{(\theta - \mu_0)^2}{\tau_0^2} \bigg) \bigg)
+p(\theta|y) \propto p(\theta)p(y|\theta) \propto exp \bigg(-\frac{1}{2} \bigg( \frac{(y-\theta)^2}{\sigma^2} + \frac{(\theta - \mu_0)^2}{\tau_0^2} \bigg) \bigg)
 $$
 
 exponential 안에 있는 것들을 펼치고 같은 변수끼리 모은 다음 $\theta$의 제곱꼴로 만들면 
@@ -87,7 +87,7 @@ $$
 \mu_1 = y \ \ \ if \ y = \mu_0 \ \ or \ \ \sigma^2 = 0
 \end{align}
 
-  만약 $\tau_0^2 = 0$이라면, 사후 분포는 데이터보다 무한대로 더 정확합니다. 그렇기 때문에 사후 분포와 사전 분포는 동일하고 $\mu_0$ 값으로 한데 모입니다. 만약 $\sigma^2 = $이라면, 데이터는 완벽하게 정확하고 사후 분포는 관찰된 값 $y$와 동일합니다. 만약 $y = \mu_0$이라면, 사전 평균과 데이터 평균이 같다는 것을 의미하고, 사후 평균은 반드시 이 지점으로 떨어집니다.
+  만약 $\tau_0^2 = 0$이라면, 사후 분포는 데이터보다 무한대 만큼 더 정확합니다. 그렇기 때문에 사후 분포와 사전 분포는 동일하고 $\mu_0$ 값으로 한데 모입니다. 만약 $\sigma^2 = 0$이라면, 데이터는 완벽하게 정확하고 사후 분포는 관찰된 값 $y$와 동일합니다. 만약 $y = \mu_0$이라면, 사전 평균과 데이터 평균이 같다는 것을 의미하고, 사후 평균은 반드시 이 지점으로 떨어집니다.
 
 ### 사후 예측 분포
 
@@ -102,7 +102,7 @@ $$
 $$
 
 $$
-= \int \underbrace{p(\tilde{y}|\theta)}_{N(\theta,\sigma^2)} \ \underbrace{p(\theta|y)d\theta}_{N(\mu_1, \tau_1^2)} 
+= \int p(\tilde{y}|\theta) \ p(\theta|y)d\theta
 $$
 
 $$
@@ -126,7 +126,7 @@ var[\tilde{y} | y ]
 $$
 
 $$
-=E[\underbrace{var[\tilde{y}|\theta,y]}_{=\sigma^2}|y] + var[\underbrace{E[\tilde{y}|\theta,y]}_{=\theta}|y]
+=E[var[\tilde{y}|\theta,y]|y] + var[E[\tilde{y}|\theta,y]|y]
 $$
 
 $$
