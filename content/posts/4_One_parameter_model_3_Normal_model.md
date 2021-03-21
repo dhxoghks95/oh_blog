@@ -241,7 +241,7 @@ p(\sigma^2|y) \propto p(\sigma^2)p(y|\sigma^2)
 $$
 
 $$
-\propto \bigg(\frac{\sigma_0^2}{\sigma^2}\bigg)^{v_0/2+1} exp\bigg(-\frac{v_0\sigma_0^2}{2\sigma^2} \bigg)} (\sigma^2)^{-n/2} exp \bigg(-\frac{n}{2} \frac{v}{\sigma^2} \bigg)
+\propto \bigg( \frac{\sigma_0^2}{\sigma^2}\bigg)^{v_0/2+1} exp\bigg( -\frac{v_0\sigma_0^2}{2\sigma^2} \bigg) (\sigma^2)^{-n/2} exp \bigg(-\frac{n}{2} \frac{v}{\sigma^2} \bigg)
 $$
 
 $$
