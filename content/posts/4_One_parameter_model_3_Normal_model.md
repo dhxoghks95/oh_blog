@@ -102,7 +102,7 @@ $$
 $$
 
 $$
-= \int \underbrace{p(\tilde{y}|\theta)}_{\text{평균이} \ \theta \ \text{이고, 분산이 }\sigma^2\text{인 정규분포}}\underbrace{p(\theta|y)d\theta}_{\text{평균이} \ \mu_1 \ \text{이고, 분산이 }\tau_1^2\text{인 정규분포}} 
+= \int \underbrace{p(\tilde{y}|\theta)}_{\text{normal distribution such that mean is} \ \theta \ \text{and variance is }\sigma^2 } \underbrace{p(\theta|y)d\theta}_{\text{normal distirbution such that mean is} \ \mu_1 \ \text{and variance is}\tau_1^2} 
 $$
 
 $$
