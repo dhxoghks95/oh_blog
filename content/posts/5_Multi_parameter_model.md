@@ -14,7 +14,7 @@ tags: ["Bayesian", "Python"]
 결합(joint) 그리고 주변(marginal) 사후 분포의 아이디어를 수학적으로 표현하기 위해서, 두 가지 가정을 해보겠습니다.
 
 1. 파라미터는 $\theta = (\theta_1, \theta_2)$와 같이 두 파트를 가지고 있습니다.
-2. 두 개 중 $\theta_1$의 추론에만 관심이 있습니다. 이 때 관심 없는 $\theta_2$를 'nuiance 파라미터'라고 합니다.
+2. 두 개 중 $\theta_1$의 추론에만 관심이 있습니다. 이 때 관심 없는 $\theta_2$를 'nuiance(=성가신, 귀찮은) 파라미터'라고 합니다.
 
 정규 분포를 예로 들면,
 
@@ -45,7 +45,7 @@ p(\theta_1|y) = \int p(\theta_1,\theta_2|y)d\theta_2 \newline
 = \int p(\theta_1|\theta_2,y)p(\theta_2|y)d\theta_2 \ \ \ \ \ \ \ \ \ \ \ \ \ \ (5.1)
 \end{align}
 
-이것은 관심있는 $\theta_1$의 사후 분포 $p(\theta_1|y)$를 nuisance 파라미터 $\theta_2$가 주어졌을 때의 조건부 사후 분포 $p(\theta_1|\theta_2,y)$를 $\theta_2$가 가질 수 있는 서로 다른 값들($p(\theta_2|y)$)을 가중치로 해서 결합한 것이란걸 보여줍니다.
+이것은 관심있는 $\theta_1$의 사후 분포 $p(\theta_1|y)$가 nuisance 파라미터 $\theta_2$가 주어졌을 때의 조건부 사후 분포 $p(\theta_1|\theta_2,y)$를 $\theta_2$가 가질 수 있는 서로 다른 값들($p(\theta_2|y)$)을 가중치로 해서 결합한 것이란걸 보여줍니다.
 
 가중치는 $\theta_2$의 사후 밀도, 즉 $\theta_2$의 사전 분포와 데이터로부터 수집한 증거의 결합에 의존합니다. 이러한 'nuiance' 파라미터로 평균화 하는 과정은 일반적으로(generally) 해석될 수 있습니다. 예를 들어 $\theta_2$는 위에서 본 연속 분포에서의 분산이 아니라 각각의 모델을 나타내는 이산적인(discrete) 요소가 될 수도 있습니다.
 
@@ -65,10 +65,10 @@ p(\theta_1|y) = \int p(\theta_1,\theta_2|y)d\theta_2 \newline
 
 ### noninformative 사전 분포
 
-noninformative prior(=vague prior)는 앞에서 배운 uniform 분포, beta(1,1) 분포와 같이 사후 분포에 아무런 영향을 주지 못하는 사전분포를 말하는 것입니다. 이 예시에서 $\mu, \sigma$에 대한 vague 사전 분포는 $\mu$(=location)와 $\sigma$(=scale) 파라미터의 사전 독립을 가정했을 때, $(\mu, log\sigma)$에서 균등 분포이고 다음과 같이 표현할 수 있습니다.(BDA 52p 참조)
+noninformative prior(=vague prior)는 앞에서 배운 uniform 분포, beta(1,1) 분포와 같이 사후 분포에 아무런 영향을 주지 못하는 사전분포를 말하는 것입니다. 이 예시에서 $\mu, \sigma)$에 대한 vague 사전 분포는 $\mu$(=location)와 $\sigma$(=scale) 파라미터의 사전 독립을 가정했을 때, $(\mu, log\sigma)$에서 균등 분포이고 다음과 같이 표현할 수 있습니다.(BDA 52p 참조)
 
 $$
-p(\mu, \sigma^2) = \underbrace{p(\mu)}_{=1}\underbrace{p(\sigma^2)}_{\propto \ \ 1/\sigma^2} \propto (\sigma^2)^{-1}
+p(\mu, \sigma^2) = p(\mu) p(\sigma^2) \propto (\sigma^2)^{-1}
 $$
 
 ### 결합 사후 분포, $p(\mu, \sigma^2|y)$
