@@ -102,7 +102,7 @@ $$
 $$
 
 $$
-= \int \underbrace{p(\tilde{y}|\theta)}_{N(\theta,\sigma^2)} \underbrace{p(\theta|y)d\theta}_{N(\mu_1, tau_1^2)} 
+= \int \underbrace{p(\tilde{y}|\theta)}_{N(\theta,\sigma^2)} \underbrace{p(\theta|y)d\theta}_{N(\mu_1, \tau_1^2)} 
 $$
 
 $$
@@ -111,7 +111,7 @@ $$
 
 첫 번째 줄은 $\theta$가 주어졌을 때 미래 관찰값 $\tilde{y}$의 분포가 과거의 데이터 $y$에 의존하지 않는다는 것(즉 조건부 독립)때문에 성립합니다. 이변량 정규 분포(bivariate normal distribution)의 특성을 이용하면 $\tilde{y}$의 분포를 더 쉽게 구할 수 있습니다. 적분 안에 있는 곱은 exponential의 $(\tilde{y}, \theta)$의 이차식 제곱 형태입니다. 따라서 $\tilde{y}, \theta$는 결합 정규 사후 분포이고 $\tilde{y}$의 주변 사후 분포(marginal posterior distribution) 또한 정규분포입니다.
 
-이제 사후분포가 $E(\tilde{y}|\theta) = \theta, var(\tilde|\theta) = \sigma^2$라는 것을 활용해 사후 예측 분포의 평균과 분산을 구해보도록 하겠습니다.
+이제 사후분포가 $E(\tilde{y}|\theta) = \theta, var(\tilde{y}|\theta) = \sigma^2$라는 것을 활용해 사후 예측 분포의 평균과 분산을 구해보도록 하겠습니다.
 
 수리통계학에서 배운 내용을 활용해 평균은 다음과 같이 구할 수 있고,
 
