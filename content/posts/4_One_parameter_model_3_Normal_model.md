@@ -102,7 +102,7 @@ $$
 $$
 
 $$
-= \int \underbrace{p(\tilde{y}|\theta)}_{N(\theta,\sigma^2)} \underbrace{p(\theta|y)d\theta}_{N(\mu_1, \tau_1^2)} 
+= \int \underbrace{p(\tilde{y}|\theta)}_{N(\theta,\sigma^2)} \ \underbrace{p(\theta|y)d\theta}_{N(\mu_1, \tau_1^2)} 
 $$
 
 $$
