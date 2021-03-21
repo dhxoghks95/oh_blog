@@ -1,6 +1,6 @@
 ---
 title: A First Course in Bayesian Statistical Methods Chapter 4 . One parameter model, 3. Normal Model
-date: 2021-03-18T17:34:01+09:00
+date: 2021-03-18T17:33:01+09:00
 categories: ["A First Course In Bayesian Statistical Methods"]
 tags: ["Bayesian", "Python"]
 ---
@@ -93,12 +93,21 @@ $$
 
 미래 관찰값 $\tilde{y}$에 대한 사후 예측 분포는 $p(\tilde{y}|y)$이고, 다음과 같이 적분을 통해 계산할 수 있습니다.
 
-\begin{align}
-p(\tilde{y}|y) = \int p(\tilde{y}, \theta|y)d\theta \newline
-= \int p(\tilde{y}|\theta, y) p(\theta|y)d\theta \newline
-= \int \underbrace{p(\tilde{y}|\theta)}_{\text{평균이} \ \theta \ \text{이고, 분산이 }\sigma^2\text{인 정규분포}}\underbrace{p(\theta|y)d\theta}_{\text{평균이} \ \mu_1 \ \text{이고, 분산이 }\tau_1^2\text{인 정규분포}} \newline
+$$
+p(\tilde{y}|y) = \int p(\tilde{y}, \theta|y)d\theta
+$$
+
+$$
+= \int p(\tilde{y}|\theta, y) p(\theta|y)d\theta 
+$$
+
+$$
+= \int \underbrace{p(\tilde{y}|\theta)}_{\text{평균이} \ \theta \ \text{이고, 분산이 }\sigma^2\text{인 정규분포}}\underbrace{p(\theta|y)d\theta}_{\text{평균이} \ \mu_1 \ \text{이고, 분산이 }\tau_1^2\text{인 정규분포}} 
+$$
+
+$$
 \propto \int \ \ \ exp \bigg(-\frac{1}{2\sigma^2}(\tilde{y} - \theta)^2 \bigg) exp \bigg(- \frac{1}{2\tau_1^2}(\theta-\mu_1)^2 \bigg) d\theta
-\end{align}
+$$
 
 첫 번째 줄은 $\theta$가 주어졌을 때 미래 관찰값 $\tilde{y}$의 분포가 과거의 데이터 $y$에 의존하지 않는다는 것(즉 조건부 독립)때문에 성립합니다. 이변량 정규 분포(bivariate normal distribution)의 특성을 이용하면 $\tilde{y}$의 분포를 더 쉽게 구할 수 있습니다. 적분 안에 있는 곱은 exponential의 $(\tilde{y}, \theta)$의 이차식 제곱 형태입니다. 따라서 $\tilde{y}, \theta$는 결합 정규 사후 분포이고 $\tilde{y}$의 주변 사후 분포(marginal posterior distribution) 또한 정규분포입니다.
 
@@ -113,7 +122,11 @@ $$
 분산은 다음과 같습니다.
 
 $$
-var[\tilde{y} | y ] = E[\underbrace{var[\tilde{y}|\theta,y]}_{=\sigma^2}|y] + var[\underbrace{E[\tilde{y}|\theta,y]}_{=\theta}|y]
+var[\tilde{y} | y ]
+$$
+
+$$
+=E[\underbrace{var[\tilde{y}|\theta,y]}_{=\sigma^2}|y] + var[\underbrace{E[\tilde{y}|\theta,y]}_{=\theta}|y]
 $$
 
 $$
@@ -134,12 +147,21 @@ $$
 
 앞에서 만들었던 사후 예측 분포의 식을 다음과 같이 확장해봅시다.
 
-\begin{align}
-p(\theta|y) \propto p(\theta) p(y|\theta) \newline
-= p(\theta) \prod_{i=1}^n p(y_i|\theta) \newline
-\propto exp \bigg( -\frac{1}{2\tau_0^2} (\theta - \mu_0)^2 \bigg) \prod_{i=1}^n exp \bigg( -\frac{1}{2\sigma^2}(y_i - \theta)^2 \bigg) \newline
+$$
+p(\theta|y) \propto p(\theta) p(y|\theta)
+$$
+
+$$
+= p(\theta) \prod_{i=1}^n p(y_i|\theta) 
+$$
+
+$$
+\propto exp \bigg( -\frac{1}{2\tau_0^2} (\theta - \mu_0)^2 \bigg) \prod_{i=1}^n exp \bigg( -\frac{1}{2\sigma^2}(y_i - \theta)^2 \bigg)
+$$
+
+$$
 \propto exp \bigg( -\frac{1}{2}\bigg(\frac{1}{\tau_0^2}(\theta - \mu_0)^2 + \frac{1}{\sigma^2} \sum_{i=1}^n (y_i - \theta)^2 \bigg) \bigg).
-\end{align}
+$$
 
 그리고 이 식을 단일 관찰값일 때와 비슷한 방식으로 대수적으로 단순화하면
 
@@ -167,19 +189,7 @@ $$
 
 이것은 실전에서 사전 믿음이 $\theta$의 범위에서 넓게 퍼져있고, 데이터의 우도(likelihood)가 중요할 때면 언제나 좋은 근사가 됩니다.
 
-## 4.3 또다른 표준 단일 파라미터 모델들
-
-일반적으로는 사후 확률 밀도 함수 $p(\theta|y)$는 닫힌 형태로 표현되지 않습니다. 즉 정규화 상수(normalizing constant) $p(y)$는 대부분 적분때문에 계산하기 매우 어렵습니다. 상당수의 옛날 베이지안 분석들은 닫힌 형태로 표현되는 상황에 집중했습니다. 그런데 그러한 모델들은 때때로 비현실적입니다. 그러나 그들의 분석은 많은 상황에서 더욱 실제적인 모델을 만드는데 유용한 시작점을 제공했습니다.
-
- **표준 분포들**
- 
-* 이항분포 : 셀 수 있는 교환가능한 산출물의 분포
-* 정규분포 : 많은 교환 가능하거나 독립인 항들의 합인 확률 변수에게 적용되는 분포 or 모든 양의 값을 가지는 데이터에 로그를 붙인 값에 적용되는 분포 
-* 포아송 또는 지수 분포 : 각각 전구간에서 교환 가능한 사건의 숫자를 세는 분포와 그 사건이 일어날 때 까지 걸리는 대기 시간의 분포(시간에 독립이고 상수인 발생 확률을 가짐)
-
-일반적으로 이러한 표준 분포들을 결합함으로서 더 복잡한 모델을 만들게 됩니다. 이러한 각각의 모델들은 이전 장에 배운 것 처럼 지수 분포족에 속하는 켤레 사전 분포를 가집니다.  
-
-### 평균을 알고, 분산을 모를 때의 정규 분포
+## 4.3 평균을 알고, 분산을 모를 때의 정규 분포
 
 평균을 알고 분산을 모를 때의 정규 모델은 그 자체로 중요하기 보단, 더 어려운 모델, 특히 바로 다음 장에 배울 평균과 분산을 모두 모를 때의 정규 분포를 만들 때 필요한 한 파트로서 중요합니다. 추가적으로, 평균을 알고 분산을 모를 때의 정규분포는 스케일 파라미터를 추정하는 입문적인 예시를 제공합니다.
 
