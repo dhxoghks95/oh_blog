@@ -236,11 +236,17 @@ $$
 
 이고, 사전분포와 데이터의 우도를 결합한 사후 분포를 구하면,
 
-\begin{align}
-p(\sigma^2|y) \propto p(\sigma^2)p(y|\sigma^2) \newline
-\propto \underbrace{\bigg(\frac{\sigma_0^2}{\sigma^2}\bigg)^{v_0/2+1} exp\bigg(-\frac{v_0\sigma_0^2}{2\sigma^2} \bigg)}_{prior} \underbrace{(\sigma^2)^{-n/2} exp \bigg(-\frac{n}{2} \frac{v}{\sigma^2} \bigg)}_{\text{likelihood of data}} \newline
+$$
+p(\sigma^2|y) \propto p(\sigma^2)p(y|\sigma^2)
+$$
+
+$$
+\propto \underbrace{\bigg(\frac{\sigma_0^2}{\sigma^2}\bigg)^{v_0/2+1} exp\bigg(-\frac{v_0\sigma_0^2}{2\sigma^2} \bigg)}_{prior} \underbrace{(\sigma^2)^{-n/2} exp \bigg(-\frac{n}{2} \frac{v}{\sigma^2} \bigg)}_{\text{likelihood of data}} 
+$$
+
+$$
 \propto (\sigma^2)^{-((n+v_0)/2+1)} exp \bigg(-\frac{1}{2\sigma^2}(v_0 \sigma_0^2 + nv) \bigg)
-\end{align}
+$$
 
 입니다. 이것은 위에서 본 $\text{Inv-}\chi^2$분포의 pdf와 같은 형태인 것을 알 수 있습니다. 즉
 
