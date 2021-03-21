@@ -68,14 +68,17 @@ p(\theta_1|y) = \int p(\theta_1,\theta_2|y)d\theta_2 \newline
 noninformative prior(=vague prior)는 앞에서 배운 uniform 분포, beta(1,1) 분포와 같이 사후 분포에 아무런 영향을 주지 못하는 사전분포를 말하는 것입니다. 이 예시에서 $\mu, \sigma)$에 대한 vague 사전 분포는 $\mu$(=location)와 $\sigma$(=scale) 파라미터의 사전 독립을 가정했을 때, $\mu$와 $\sigma$는 각각 다음과 같은 균등 분포를 가정하며
 
 $$
-p(\mu) = 1
+p(\mu) \propto 1
 $$
 
 $$
-p(log(\sigma)) = 1
+p(log(\sigma)) \propto 1
 $$
 
-> cf) 왜 p(\sigma) = 1을 안쓰고 p(log(\sigma)) = 1을 균등분포로 쓰나요?
+> 왜 p($\sigma$) $\propto$ 1을 안쓰고 $p(log(\sigma)) \ \propto \ 1$을 균등분포로 쓰나요? 
+> $p(\sigma^2) \propto 1/\sigma^2$로 만들기 위해섭니다!
+$X = log(\sigma)$라고 했을 때, $T(X) = \sigma = e^X = Y$로 변환해봅시다. 그렇다면 역변환은 $T^{-1}(Y) = log(Y)$이고, 그렇다면 jacobian은 $|\frac{\delta X}{\delta Y}| = \frac{1}{Y}$입니다. 따라서 우리가 $p(X) \propto 1$을 가정했기 때문에, $p(Y)=p(\sigma) = |\frac{\delta X}{\delta Y}|p(log(Y)) \propto 1/Y$가 됩니다.
+
 
 
 다음과 같이 표현할 수 있습니다.(BDA 52p 참조)
@@ -138,6 +141,9 @@ $$
 $$
 
 $$
+$$
+
+$$
 \therefore \int exp\bigg( -\frac{1}{2\sigma^2} n(\bar{y} - \mu)^2 \bigg) d\mu = \sqrt{2\pi\sigma^2/n}
 $$
 
@@ -163,7 +169,7 @@ $$
 
 ### 결합 사후 분포에서 표본 추출하기
 
-결합 사후 분포에서 표본을 추출하는건 쉽습니다(R을 예로 들면 그냥 dbeta와 같은 함수를 쓰면 됩니다!): 처음으로 (5.5)에서 $\sigma^2$을 뽑고, 이것을 사용해 (3.3)에서 $\mu$를 뽑습니다. 
+결합 사후 분포에서 표본을 추출하는건 쉽습니다(R을 예로 들면 그냥 rbeta와 같은 함수를 쓰면 됩니다!): 처음으로 (5.5)에서 $\sigma^2$을 뽑고, 이것을 사용해 (3.3)에서 $\mu$를 뽑습니다. 
 
 표본 추출을 통한 방법도 있지만, 이 예시에서의 사후 분포는 적분이 닫힌 형태로 풀리는 흔치 않은 파라미터가 여러개인 모델 중 하나입니다.
 
