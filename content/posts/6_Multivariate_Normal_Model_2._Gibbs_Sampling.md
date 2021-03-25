@@ -162,33 +162,11 @@ for s in np.arange(0,5000):
 
 
 ```python
-pd.DataFrame(THETA[1] - THETA[0]).quantile(q = [0.025, 0.5, 0.975]).transpose()
+print(pd.DataFrame(THETA[1] - THETA[0]).quantile(q = [0.025, 0.5, 0.975]).transpose())
 ```
 
-
-
-
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>0.025</th>
-      <th>0.500</th>
-      <th>0.975</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1.346646</td>
-      <td>6.54119</td>
-      <td>11.440845</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
+          0.025     0.500      0.975
+    0  1.332932  6.558059  11.606692
 
 
 
