@@ -14,7 +14,10 @@ tags: ["Bayesian", "Python"]
 지난 포스팅에서 다음을 배웠습니다.
 
 $$
-\{ \boldsymbol{\theta} | \mathbf{y_1}, ..., \mathbf{y_n}, \Sigma \} \sim MVN(\boldsymbol{\mu_n}, \Lambda_n) \\
+\{ \boldsymbol{\theta} | \mathbf{y_1}, ..., \mathbf{y_n}, \Sigma \} \sim MVN(\boldsymbol{\mu_n}, \Lambda_n) 
+$$
+
+$$
 \{ \Sigma | \mathbf{y_1}, ..., \mathbf{y_n}, \boldsymbol{\theta} \} \sim \text{inverse-Wishart}(\nu_n, \boldsymbol{S_n}^{-1})
 $$
 
