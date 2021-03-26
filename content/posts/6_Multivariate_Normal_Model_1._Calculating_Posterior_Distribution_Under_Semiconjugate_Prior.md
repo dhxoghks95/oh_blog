@@ -308,7 +308,7 @@ $\frac{1}{n} \mathbf{S_{\theta}} | \boldsymbol{\theta}$는 참 공분산 행렬 
 $$
 p(\Sigma| \mathbf{y_1}, ..., \mathbf{y_n}, \boldsymbol{\theta})  \\
 \propto p(\Sigma) \times p(\mathbf{y_1}, ..., \mathbf{y_n}|\boldsymbol{\theta}, \Sigma) \\
-\propto \bigg( |\Sigma|^{-(\nu_0 + p + 1)/2} \text{exp} \bigg\{-\text{tr}(\mathbf{S_0}\Sigma^{-1})/2 \bigg\} \bigg) \times \bigg(|\Sigma|^{-n/2} \text{exp} \bigg\{-\text{tr}(\mathbf{S_{\theta}}\Sigma^{-1})/2 \bigg\} \bigg) \\
+\propto \bigg( |\Sigma|^{-(\nu_0 + p + 1)/2} \text{exp} \bigg(-\text{tr}(\mathbf{S_0}\Sigma^{-1})/2 \bigg) \bigg) \times \bigg(|\Sigma|^{-n/2} \text{exp} \bigg(-\text{tr}(\mathbf{S_{\theta}}\Sigma^{-1})/2 \bigg) \bigg) \\
 = |\Sigma|^{-(\nu_0 + n + p + 1)/2} \text{exp} \{ -\text{tr}([\mathbf{S_0} + \mathbf{S_{\theta}}]\Sigma^{-1})/2 \}
 $$
 
