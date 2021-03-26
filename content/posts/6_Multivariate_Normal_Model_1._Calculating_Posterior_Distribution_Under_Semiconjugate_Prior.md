@@ -221,8 +221,11 @@ $$
 그리고 이러한 평균이 0인 케이스에서는 $Z^T Z/n$가 모 공분산 행렬의 불편 추정량(unbiased estimator)인 표본 공분산 행렬과 같습니다.
 
 $$
-\frac{1}{n}[Z^T Z]_{j,j} = \frac{1}{n}\Sigma_{i=1}^{n} z^2_{i,j} = s_{j,j} = s^2_j \\
-\frac{1}{n}[Z^T Z]_{j,k} = \frac{1}{n}\Sigma_{i=1}^{n} z_{i,j} z_{i,k} = s_{j,k}
+\frac{1}{n} [Z^T Z]_{j,j}  = \frac{1}{n}\Sigma_{i=1}^{n} z^2_{i,j} = s_{j,j} = s^2_j
+$$
+
+$$
+\frac{1}{n}[Z^T Z]_{j,k} = \frac{1}{n}\Sigma^n_{i=1} z_{i,j} z_{i,k} = s_{j,k}
 $$
 
 만약 n>p이고, $\boldsymbol{z_i}$들이 선형 독립이라면, $\mathbf{Z^T Z}$는 양의 정의를 만족하고 대칭행렬이 됩니다. 이러한 가정은 다음과 같은 방식으로 "무작위" 공분산 행렬(random covariance matrix)을 만들 수 있게 합니다. 양의 정수 $\nu_0$과 $p \times p$ 공분산 행렬 $\Phi_0$이 주어졌을 때,
