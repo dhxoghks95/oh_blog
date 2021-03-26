@@ -23,7 +23,7 @@ tags: ["Bayesian", "Python"]
 이 때 주어진 데이터는 다음과 같습니다.
 
 $$
-\textbf{Y}_i = \bigg( {Y_{i,1}\atop Y_{i,2}} \bigg) = \bigg( {\text{score on first test} \atop \text{score on second test}} \bigg) .
+\textbf{Y}_i = \bigg( {Y_{i,1}\atop Y_{i,2}} \bigg) = \bigg( {\text{score} \ \text{on} \ \text{first} \  \text{test}} \atop \text{score} \ \text{on} \ \text{second} \ \text{test}} \bigg) .
 $$
 
 그리고 우리가 관심있는 것은 모평균 $\theta$와 모 공분산 행렬 $\Sigma$ 입니다.
