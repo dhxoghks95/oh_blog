@@ -324,7 +324,7 @@ $$
 즉 다음과 같은 결과를 얻게 됩니다.
 
 $$
-\{\Sigma | \mathbf{y_1}, ..., \mathbf{y_n}, \boldsymbol{\theta} \} \sim \text{inverse-Wishart}(\nu_0 + n, [\mathbf{S_0} + \mathbf{S_{\theta}}]^{-1})
+\{\Sigma | \mathbf{y_1}, ..., \mathbf{y_n}, \boldsymbol{\theta} \} \sim \text{inverse-Wishart}(\nu_0 + n, [\mathbf{S_0} + \mathbf{S_{\theta}}]^{-1}) \ \ \ \ \ \ (6.9)
 $$
 
 이것은 다음과 같이 해석할 수 있습니다
