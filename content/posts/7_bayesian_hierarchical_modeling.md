@@ -49,7 +49,7 @@ $$
     만일 p < 0.05라면
    - 두 그룹이 같은 분포를 가지고 있다는 가설을 채택합니다.
    - $\theta_1 = \theta_2$라는 결론을 내립니다
-   - $\hat{\theta}_1 = \hat{\theta}_2 = (\Sigma y_{i,1} + \Sigma y_{i,2}) / (n_1 + n_2)$라는 추정량을 사용합니다.
+   - $\hat{\theta}_ 1 = \hat{\theta}_ 2 = (\Sigma y_{i,1} + \Sigma y_{i,2}) / (n_1 + n_2)$라는 추정량을 사용합니다.
 
 이 데이터 분석 과정에 따르면 두 모집단은 완벽하게 구분된 것으로 생각하거나, 그들을 정확하게 동일한 것으로 생각합니다. 이러한 극단적으로 이분법적인 결과가 과연 옳은 것일까요? 수학 점수 데이터를 위의 과정으로 분석한 결과인 p = 0.087은 0.05보다 크므로 두 그룹을 수적으로(numerically) 동일하게 취급해야 한다고 말합니다. 둘이 다르다는 몇 가지 증거가 있음에도 불구하고 말이죠. 반대로 학교 1에서 더 많은 성적 높은 학생들이 뽑히고 학교 2에서 더 많은 성적 낮은 학생들이 뽑히는 시나리오를 어렵지 않게 상상할 수 있습니다. 이 경우에서 관찰된 p-value는 0.04나 0.05가 될 수 있겠죠. 후자의 케이스에서는 각각의 모집단을 구분하여 취급할 것입니다. 오직 학교 1의 데이터로만 $\theta_1$을 추정하고, 학교 2의 데이터로만 $\theta_2$를 추정하면서 말이죠. 이 후자의 방식은 불충분해 보입니다. 왜냐하면 두 표본이 모두 동질적인 학생들의 모집단에서 같은 것을 측정하기 때문이죠. 따라서 한 그룹에서의 정보가 다른 그룹의 평균을 추정하는데 도움을 줄 수 있다는 것을 이해할 수 있을것입니다.
 
@@ -78,7 +78,7 @@ p(\mu, \delta, \sigma^2) = p(\mu) \times p(\delta) \times p(\sigma^2) \newline
 
 \begin{align}
 \mu|\mathbf{y_1, y_2}, \delta, \sigma^2 \sim \text{Normal}(\mu_n, \gamma_n^2), \text{where} \newline
-\mu_n = \gamma_n^2 \times [\mu_0 / \gamma_0^2 + \sum^{n_1}_{i=1} (y_{i,1} - \delta) / \sigma^2 + \sum^{n_2}_{i=1} (y_{i,1} + \delta) / \sigma^2] \newline
+\mu_n = \gamma_n^2 \times [\mu_0 / \gamma_0^2 + \sum^{n_1}_ {i=1} (y_{i,1} - \delta) / \sigma^2 + \sum^{n_2}_ {i=1} (y_{i,1} + \delta) / \sigma^2] \newline
 \gamma_n^2 = [1/\gamma_0^2 + (n_1 + n_2) / \sigma^2]^{-1}
 \end{align}
 
@@ -330,7 +330,7 @@ $$
 식 (7.3)에서 $\theta_j$에 의존하는 항들은 $\theta_j$의 full conditional distribution이 다음과 같은 비례 관계가 있다는 것을 보여줍니다.
 
 $$
-p(\theta_j|\mu, \tau^2, \sigma^2, \mathbf{y_1, ..., y_m}) \propto p(\theta_j|\mu, \tau^2) \prod^{n_j}_{i=1} p(y_{i,j}|\theta_j, \sigma^2)
+p(\theta_j|\mu, \tau^2, \sigma^2, \mathbf{y_1, ..., y_m}) \propto p(\theta_j|\mu, \tau^2) \prod^{n_j}_ {i=1} p(y_{i,j}|\theta_j, \sigma^2)
 $$
 
 이것은 {$\mu, \tau^2, \sigma^2, \mathbf{y_j}$}가 주어졌을 때, $\theta_j$의 조건부 확률은 다른 $\theta$들과 $j$가 아닌 그룹에서 뽑힌 데이터들에 모두 조건부 독립이란 것을 의미합니다. **그림 7.3**을 보면 더 쉽게 이해할 수 있습니다. 각각의 $\theta_j$에서 모든 다른 $\theta_k$로 가는 길이 있지만, 그 길은 ($\mu, \tau^2$) 또는 $\sigma^2$를 통해야만 합니다. 이것은 즉 $\theta$들은 서로에게 $\mu, \tau^2, \sigma^2$에 포함되어 있는 것을 넘어서는 정보를 주지 않는다는 것을 의미합니다. 
